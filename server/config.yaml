@@ -25,7 +25,7 @@ captcha:
     key-long: 6
     img-width: 240
     img-height: 80
-    open-captcha: 0
+    open-captcha: 1
     open-captcha-timeout: 3600
 cloudflare-r2:
     bucket: xxxx0bucket
@@ -186,9 +186,9 @@ qiniu:
     use-cdn-domains: false
 redis:
     name: ""
-    addr: 127.0.0.1:6379
-    password: ""
-    db: 0
+    addr: 127.0.0.1:6888
+    password: "592530326"
+    db: 5
     useCluster: false
     clusterAddrs:
         - 172.21.0.3:7000
@@ -226,7 +226,7 @@ system:
     iplimit-count: 15000
     iplimit-time: 3600
     use-multipoint: false
-    use-redis: false
+    use-redis: true
     use-mongo: false
     use-strict-auth: false
 tencent-cos:
