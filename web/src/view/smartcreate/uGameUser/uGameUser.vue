@@ -74,7 +74,18 @@
   —
   <el-input class="w-40" v-model.number="searchInfo.endTotalTalisman" placeholder="最大值" />
 </el-form-item>
-            
+
+  <el-form-item label="区服名称" prop="gameServerName">
+  <el-input v-model="searchInfo.gameServerName" placeholder="搜索条件" />
+</el-form-item>
+    
+
+<el-form-item label="区服ID" prop="gameServerId">
+  <el-input class="w-40" v-model.number="searchInfo.startGameServerId" placeholder="最小值" />
+  —
+  <el-input class="w-40" v-model.number="searchInfo.endGameServerId" placeholder="最大值" />
+</el-form-item>
+
 
         <template v-if="showAllQuery">
           <!-- 将需要控制显示状态的查询条件添加到此范围内 -->
@@ -111,6 +122,11 @@
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         
+        <el-table-column sortable align="left" label="区服名称" prop="gameServerName" width="120" />
+
+        <el-table-column sortable align="left" label="区服ID" prop="gameServerId" width="120" />
+
+
             <el-table-column sortable align="left" label="用户昵称" prop="nickName" width="120">
     <template #default="scope">
         <span>{{ filterDataSource(dataSource.nickName,scope.row.nickName) }}</span>
@@ -176,7 +192,15 @@
         <el-option v-for="(item,key) in dataSource.nickName" :key="key" :label="item.label" :value="item.value" />
     </el-select>
 </el-form-item>
-            <el-form-item label="登录码:" prop="loginCode">
+
+   <el-form-item label="区服名称:" prop="gameServerName">
+    <el-input v-model="formData.gameServerName" :clearable="true" placeholder="请输入区服名称" />
+</el-form-item>
+     <el-form-item label="区服ID:" prop="gameServerId">
+    <el-input v-model.number="formData.gameServerId" :clearable="true" placeholder="请输入区服ID" />
+</el-form-item>
+
+<el-form-item label="登录码:" prop="loginCode">
     <el-input v-model="formData.loginCode" :clearable="true" placeholder="请输入登录码" />
 </el-form-item>
             <el-form-item label="游戏角色名称:" prop="roleGameName">
@@ -218,7 +242,16 @@
         <span>{{ filterDataSource(dataSource.nickName,detailForm.nickName) }}</span>
     </template>
 </el-descriptions-item>
-                    <el-descriptions-item label="登录码">
+
+  <el-descriptions-item label="区服名称">
+    {{ detailForm.gameServerName }}
+</el-descriptions-item>
+    <el-descriptions-item label="区服ID">
+    {{ detailForm.gameServerId }}
+</el-descriptions-item>
+
+
+<el-descriptions-item label="登录码">
     {{ detailForm.loginCode }}
 </el-descriptions-item>
                     <el-descriptions-item label="游戏角色名称">
@@ -330,6 +363,13 @@ const rule = reactive({
                    trigger: ['input', 'blur'],
               }
               ],
+                gameServerId : [{
+                required: true,
+                message: '',
+                trigger: ['input','blur'],
+               },
+            ],
+
                loginCode : [{
                    required: true,
                    message: '',
@@ -536,6 +576,8 @@ const closeDialog = () => {
         unBoundTalisman: undefined,
         boundTalisman: undefined,
         totalTalisman: undefined,
+        gameServerName: '',
+        gameServerId: undefined,
         }
 }
 // 弹窗确定

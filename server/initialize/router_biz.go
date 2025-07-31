@@ -16,5 +16,6 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 	{
 		smartcreateRouter := router.RouterGroupApp.Smartcreate
 		smartcreateRouter.InitGameUserAuthCodeRouter(privateGroup, publicGroup)
+		smartcreateRouter.InitGameUserRouter(privateGroup, publicGroup)
 	}
 }

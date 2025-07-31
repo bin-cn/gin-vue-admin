@@ -10,6 +10,15 @@
 </el-form-item>
         <el-form-item label="登录码:" prop="loginCode">
     <el-input v-model="formData.loginCode" :clearable="true" placeholder="请输入登录码" />
+
+
+<el-form-item label="区服名称:" prop="gameServerName">
+    <el-input v-model="formData.gameServerName" :clearable="true" placeholder="请输入区服名称" />
+</el-form-item>
+        <el-form-item label="区服ID:" prop="gameServerId">
+    <el-input v-model.number="formData.gameServerId" :clearable="true" placeholder="请输入区服ID" />
+</el-form-item>
+
 </el-form-item>
         <el-form-item label="游戏角色名称:" prop="roleGameName">
     <el-input v-model="formData.roleGameName" :clearable="true" placeholder="请输入游戏角色名称" />
@@ -87,6 +96,8 @@ const formData = ref({
             unBoundTalisman: undefined,
             boundTalisman: undefined,
             totalTalisman: undefined,
+            gameServerName: '',
+            gameServerId: undefined,
         })
 // 验证规则
 const rule = reactive({
@@ -95,6 +106,12 @@ const rule = reactive({
                    message: '',
                    trigger: ['input','blur'],
                }],
+                gameServerId : [{
+                required: true,
+                message: '',
+                trigger: ['input','blur'],
+              }
+            ],
                loginCode : [{
                    required: true,
                    message: '',
