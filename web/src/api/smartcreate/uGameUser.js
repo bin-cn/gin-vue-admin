@@ -121,3 +121,16 @@ export const getGameUserPublic = () => {
     method: 'get',
   })
 }
+// SubmitGoldCoinInfo 提交用户资产信息
+// @Tags GameUser
+// @Summary 提交用户资产信息
+// @Accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=object,msg=string} "成功"
+// @Router /game_user/submit_gold_coin_info [POST]
+export const submit_gold_coin_info = () => {
+  return service({
+    url: '/game_user/submit_gold_coin_info',
+    method: 'POST'
+  })
+}

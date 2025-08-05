@@ -2,6 +2,8 @@ package smartcreate
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate"
@@ -163,4 +165,74 @@ func (game_userService *GameUserService) GetGameUserDataSource(ctx context.Conte
 func (game_userService *GameUserService) GetGameUserPublic(ctx context.Context) {
 	// 此方法为获取数据源定义的数据
 	// 请自行实现
+}
+
+// SubmitGoldCoinInfo 提交用户资产信息
+// Author [yourname](https://github.com/yourname)
+func (game_userService *GameUserService) SubmitGoldCoinInfo(ctx context.Context, game_user smartcreateReq.SubmitGoldCoinInfo) (err error) {
+	var count int64
+	var existingUser *smartcreate.GameUser
+	var userId uint = 0
+
+	// 1.查询数据库中是否有这个授权码,如果有则更新.
+	//  这里实际上应该还要查询一个UserId,这里暂时先不处理,先把导入处理完毕以后再加入.
+	err = global.GVA_DB.WithContext(ctx).Model(&smartcreate.GameUser{}).
+		Where("login_code = ?", game_user.LoginCode).
+		First(&existingUser).Error
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("未能找到该授权码对应用户: %w", err)
+	}
+
+	if err != nil && existingUser != nil {
+		userId = uint(*existingUser.UserId)
+		if userId != game_user.UpdatedBy {
+			fmt.Print("这里临时输出日志,后需需要判断该授权码是否属于当前用户..")
+		}
+	}
+
+	// 若存在，手动指定需要更新的字段
+	if err == nil && existingUser != nil {
+		// 仅更新需要的字段（示例：未绑定元宝、绑定元宝、总元宝等）
+		updateData := map[string]interface{}{
+			"bound_ingot_quantity":    *game_user.TotalIngotQuantity - *game_user.UnBoundIngotQuantity,
+			"bound_talisman":          *game_user.TotalTalisman - *game_user.UnBoundTalisman,
+			"total_ingot_quantity":    *game_user.TotalIngotQuantity,
+			"total_talisman":          *game_user.TotalTalisman,
+			"un_bound_ingot_quantity": *game_user.UnBoundIngotQuantity,
+			"un_bound_talisman":       *game_user.UnBoundTalisman,
+
+			// 可根据需求添加其他需要更新的字段
+		}
+
+		err = global.GVA_DB.WithContext(ctx).Model(&smartcreate.GameUser{}).
+			Where("id = ?", existingUser.ID).
+			Updates(updateData).Error // 仅更新指定字段
+		if err != nil {
+			return fmt.Errorf("更新用户信息失败: %w", err)
+		}
+		return nil
+	}
+
+	// 2. 查询授权码信息
+	err = global.GVA_DB.WithContext(ctx).Model(&smartcreate.GameUserAuthCode{}).Where("login_code = ?", game_user.LoginCode).
+		Count(&count).Error
+	if err != nil {
+		return fmt.Errorf("授权码不存在.")
+	}
+	if count == 0 {
+		return errors.New("login_code不存在，无法创建用户信息")
+	}
+
+	// 如果没有则从授权信息中获取这个授权信息插入进去,更新
+	// err = game_userService.CreateGameUser(ctx, gameUser)
+	// if err != nil {
+	// 	return fmt.Errorf("插入用户信息失败: %w", err)
+	// }
+	// // 增加日志记录.
+
+	// // 请在这里实现自己的业务逻辑
+	// db := global.GVA_DB.Model(&smartcreate.GameUser{})
+	// return db.Error
+	return nil
 }
