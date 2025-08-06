@@ -2,11 +2,12 @@ package initialize
 
 import (
 	"fmt"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/task"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/plugin/systask/service"
+	"github.com/robfig/cron/v3"
 )
 
 func Timer() {
@@ -34,4 +35,7 @@ func Timer() {
 		//	fmt.Println("add timer error:", err)
 		//}
 	}()
+
+	service.ServiceGroupApp.SysTaskService.Initialize()
+
 }
