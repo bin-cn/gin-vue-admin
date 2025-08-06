@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	globalTask "github.com/flipped-aurora/gin-vue-admin/server/plugin/systask/global"
@@ -9,7 +11,6 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/systask/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"strconv"
 )
 
 type SysTaskApi struct {
