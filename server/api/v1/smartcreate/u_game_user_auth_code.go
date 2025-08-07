@@ -6,6 +6,7 @@ import (
     "github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
     "github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate"
     smartcreateReq "github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate/request"
+    "github.com/flipped-aurora/gin-vue-admin/server/utils"
     "github.com/gin-gonic/gin"
     "go.uber.org/zap"
 )
@@ -156,7 +157,13 @@ func (game_user_auth_codeApi *GameUserAuthCodeApi) GetGameUserAuthCodeList(c *gi
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := game_user_auth_codeService.GetGameUserAuthCodeInfoList(ctx,pageInfo)
+	
+	// 获取当前登录用户ID
+	userId := utils.GetUserID(c)
+	// 获取当前登录用户角色ID
+	authorityId := utils.GetUserAuthorityId(c)
+	
+	list, total, err := game_user_auth_codeService.GetGameUserAuthCodeInfoListWithAuth(ctx, pageInfo, userId, authorityId)
 	if err != nil {
 	    global.GVA_LOG.Error("获取失败!", zap.Error(err))
         response.FailWithMessage("获取失败:" + err.Error(), c)

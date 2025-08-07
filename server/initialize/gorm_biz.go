@@ -7,7 +7,7 @@ import (
 
 func bizModel() error {
 	db := global.GVA_DB
-	err := db.AutoMigrate(smartcreate.GameUser{}, smartcreate.GameUserAuthCode{})
+	err := db.AutoMigrate(smartcreate.GameUser{}, smartcreate.GameUserAuthCode{}, smartcreate.GameServer{})
 	if err != nil {
 		return err
 	}

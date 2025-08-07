@@ -42,12 +42,21 @@
 </el-form-item>
             
             <el-form-item label="游戏角色ID" prop="roleGameId">
-  <el-input v-model.number="searchInfo.roleGameId" placeholder="搜索条件" />
+  <el-input v-model="searchInfo.roleGameId" placeholder="搜索条件" />
 </el-form-item>
             
             <el-form-item label="ID名字" prop="iDName">
   <el-input v-model="searchInfo.iDName" placeholder="搜索条件" />
 </el-form-item>
+<el-form-item label="主区服" prop="mainServerZone">
+  <el-input v-model="searchInfo.mainServerZone" placeholder="搜索条件" />
+</el-form-item>
+    
+
+<el-form-item label="游戏账户内部ID" prop="accountInternalId">
+  <el-input v-model="searchInfo.accountInternalId" placeholder="搜索条件" />
+</el-form-item>
+    
             
 
         <template v-if="showAllQuery">
@@ -68,7 +77,7 @@
             <el-button  icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">删除</el-button>
             <ExportTemplate  template-id="smartcreate_GameUserAuthCode" />
             <ExportExcel  template-id="smartcreate_GameUserAuthCode" filterDeleted/>
-            <ImportExcel  template-id="smartcreate_GameUserAuthCode" @on-success="getTableData" />
+            <ImportExcel  template-id="smartcreate_GameUserAuthCode" @on-success="getTableData" custom-import="true" />
         </div>
         <el-table
         ref="multipleTable"
@@ -106,8 +115,11 @@
             <el-table-column sortable align="left" label="开区时间" prop="serverOpenTime" width="120" />
 
             <el-table-column sortable align="left" label="进区时间" prop="enterServerTime" width="120" />
+            <el-table-column sortable align="left" label="主区服" prop="mainServerZone" width="120" />
 
+             <el-table-column align="left" label="游戏内部账号ID" prop="accountInternalId" width="120" />
             <el-table-column sortable align="left" label="账号状态" prop="accountStatus" width="120">
+              
     <template #default="scope">
     {{ filterDict(scope.row.accountStatus,AccountStatusOptions) }}
     </template>
@@ -175,7 +187,7 @@
     <el-input v-model="formData.roleGameName" :clearable="true" placeholder="请输入游戏角色名字" />
 </el-form-item>
             <el-form-item label="游戏角色ID:" prop="roleGameId">
-    <el-input v-model.number="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
+    <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
 </el-form-item>
             <el-form-item label="开区时间:" prop="serverOpenTime">
     <el-input v-model="formData.serverOpenTime" :clearable="true" placeholder="请输入开区时间" />
@@ -183,6 +195,13 @@
             <el-form-item label="进区时间:" prop="enterServerTime">
     <el-input v-model="formData.enterServerTime" :clearable="true" placeholder="请输入进区时间" />
 </el-form-item>
+   <el-form-item label="主区服:" prop="mainServerZone">
+    <el-input v-model="formData.mainServerZone" :clearable="true" placeholder="请输入主区服" />
+</el-form-item>
+     <el-form-item label="游戏内部账号ID:" prop="accountInternalId">
+    <el-input v-model="formData.accountInternalId" :clearable="true" placeholder="请输入游戏内部账号ID" />
+</el-form-item>
+
             <el-form-item label="账号状态:" prop="accountStatus">
     <el-select v-model="formData.accountStatus" placeholder="请选择账号状态" style="width:100%" filterable :clearable="true">
         <el-option v-for="(item,key) in AccountStatusOptions" :key="key" :label="item.label" :value="item.value" />
@@ -197,6 +216,11 @@
             <el-form-item label="身份证号码:" prop="iDCardNumber">
     <el-input v-model="formData.iDCardNumber" :clearable="true" placeholder="请输入身份证号码" />
 </el-form-item>
+
+<el-form-item label="用户ID" prop="userId">
+  <el-input v-model.number="searchInfo.userId" placeholder="搜索条件" />
+</el-form-item>
+    
           </el-form>
     </el-drawer>
 
@@ -244,10 +268,21 @@
                     <el-descriptions-item label="ID名字">
     {{ detailForm.iDName }}
 </el-descriptions-item>
-                    <el-descriptions-item label="身份证号码">
-    {{ detailForm.iDCardNumber }}
+   <el-descriptions-item label="主区服">
+    {{ detailForm.mainServerZone }}
 </el-descriptions-item>
+    <el-descriptions-item label="游戏内部账号ID">
+    {{ detailForm.accountInternalId }}
+</el-descriptions-item>
+         <el-descriptions-item label="身份证号码">
+                   {{ detailForm.iDCardNumber }}
+          </el-descriptions-item>
+   <el-descriptions-item label="用户ID">
+                   {{ detailForm.userId }}
+          </el-descriptions-item>
+
             </el-descriptions>
+
         </el-drawer>
 
   </div>
@@ -306,6 +341,10 @@ const formData = ref({
             remark: '',
             iDName: '',
             iDCardNumber: '',
+            userId: undefined,
+            mainServerZone: '',
+            accountInternalId: '',
+
         })
 
 
@@ -421,8 +460,15 @@ const rule = reactive({
                    whitespace: true,
                    message: '不能只输入空格',
                    trigger: ['input', 'blur'],
-              }
+              },
+                {
+                    required: true,
+                    message: '用户ID不能为空',
+                    trigger: ['input','blur'],
+                },
               ],
+              
+
 })
 
 const elFormRef = ref()

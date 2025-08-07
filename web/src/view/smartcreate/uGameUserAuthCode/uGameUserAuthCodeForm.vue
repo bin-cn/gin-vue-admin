@@ -28,7 +28,7 @@
     <el-input v-model="formData.roleGameName" :clearable="true" placeholder="请输入游戏角色名字" />
 </el-form-item>
         <el-form-item label="游戏角色ID:" prop="roleGameId">
-    <el-input v-model.number="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
+    <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
 </el-form-item>
         <el-form-item label="开区时间:" prop="serverOpenTime">
     <el-input v-model="formData.serverOpenTime" :clearable="true" placeholder="请输入开区时间" />
@@ -50,6 +50,17 @@
         <el-form-item label="身份证号码:" prop="iDCardNumber">
     <el-input v-model="formData.iDCardNumber" :clearable="true" placeholder="请输入身份证号码" />
 </el-form-item>
+    <el-form-item label="用户ID:" prop="userId">
+    <el-input v-model.number="formData.userId" :clearable="true" placeholder="请输入用户ID" />
+</el-form-item>
+
+    <el-form-item label="主区服:" prop="mainServerZone">
+    <el-input v-model="formData.mainServerZone" :clearable="true" placeholder="请输入主区服" />
+</el-form-item>
+        <el-form-item label="游戏内部账号ID:" prop="accountInternalId">
+    <el-input v-model="formData.accountInternalId" :clearable="true" placeholder="请输入游戏内部账号ID" />
+</el-form-item>
+
         <el-form-item>
           <el-button :loading="btnLoading" type="primary" @click="save">保存</el-button>
           <el-button type="primary" @click="back">返回</el-button>
@@ -101,6 +112,8 @@ const formData = ref({
             remark: '',
             iDName: '',
             iDCardNumber: '',
+            mainServerZone: '',
+            accountInternalId: '',
         })
 // 验证规则
 const rule = reactive({
@@ -158,7 +171,13 @@ const rule = reactive({
                    required: true,
                    message: '',
                    trigger: ['input','blur'],
-               }],
+               },
+            {
+                required: true,
+                message: '用户ID不能为空',
+                trigger: ['input','blur'],
+            },
+            ],
 })
 
 const elFormRef = ref()

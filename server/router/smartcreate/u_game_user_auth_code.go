@@ -21,6 +21,8 @@ func (s *GameUserAuthCodeRouter) InitGameUserAuthCodeRouter(Router *gin.RouterGr
 	{
 		game_user_auth_codeRouterWithoutRecord.GET("findGameUserAuthCode", game_user_auth_codeApi.FindGameUserAuthCode)        // 根据ID获取用户授权码码登录信息
 		game_user_auth_codeRouterWithoutRecord.GET("getGameUserAuthCodeList", game_user_auth_codeApi.GetGameUserAuthCodeList)  // 获取用户授权码码登录信息列表
+		game_user_auth_codeRouter.POST("importCustom", game_user_auth_codeImportApi.ImportExcelWithCustomLogic)              // 自定义Excel导入
+		game_user_auth_codeRouterWithoutRecord.GET("downloadTemplate", game_user_auth_codeImportApi.DownloadImportTemplate)    // 下载导入模板
 	}
 	{
 	    game_user_auth_codeRouterWithoutAuth.GET("getGameUserAuthCodePublic", game_user_auth_codeApi.GetGameUserAuthCodePublic)  // 用户授权码码登录信息开放接口
