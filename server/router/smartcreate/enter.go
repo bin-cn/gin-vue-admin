@@ -6,6 +6,7 @@ type RouterGroup struct {
 	GameUserRouter
 	GameUserAuthCodeRouter
 	GameServerRouter
+	CookieDataRouter
 }
 
 var (
@@ -13,4 +14,5 @@ var (
 	game_user_auth_codeApi       = api.ApiGroupApp.SmartcreateApiGroup.GameUserAuthCodeApi
 	game_user_auth_codeImportApi = api.ApiGroupApp.SmartcreateApiGroup.GameUserAuthCodeImportApi
 	gamesrvApi                   = api.ApiGroupApp.SmartcreateApiGroup.GameServerApi
+	wcApi                        = api.ApiGroupApp.SmartcreateApiGroup.CookieDataApi
 )

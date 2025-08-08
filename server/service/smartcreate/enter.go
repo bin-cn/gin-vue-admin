@@ -5,4 +5,5 @@ type ServiceGroup struct {
 	GameUserAuthCodeService
 	GameUserAuthCodeImportService
 	GameServerService
+	CookieDataService
 }
