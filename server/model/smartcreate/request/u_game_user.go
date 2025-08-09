@@ -37,6 +37,24 @@ type GameUserSearch struct {
 	EndBoundTalisman          *int    `json:"endBoundTalisman" form:"endBoundTalisman"`
 	StartTotalTalisman        *int    `json:"startTotalTalisman" form:"startTotalTalisman"`
 	EndTotalTalisman          *int    `json:"endTotalTalisman" form:"endTotalTalisman"`
+	// 在结构体中新增如下字段
+	RoleOnlineStatus           *string     `json:"roleOnlineStatus" form:"roleOnlineStatus"`
+	ScriptOnlineStatus         *string     `json:"scriptOnlineStatus" form:"scriptOnlineStatus"`
+	BannedStatus               *string     `json:"bannedStatus" form:"bannedStatus"`
+	StartTalismanDiff          *int        `json:"startTalismanDiff" form:"startTalismanDiff"`
+	EndTalismanDiff            *int        `json:"endTalismanDiff" form:"endTalismanDiff"`
+	StartIngotDiff             *int        `json:"startIngotDiff" form:"startIngotDiff"`
+	EndIngotDiff               *int        `json:"endIngotDiff" form:"endIngotDiff"`
+	LastSyncQueryTimeRange     []time.Time `json:"lastSyncQueryTimeRange" form:"lastSyncQueryTimeRange[]"`
+	LastSyncUpdateTimeRange    []time.Time `json:"lastSyncUpdateTimeRange" form:"lastSyncUpdateTimeRange[]"`
+	ScriptLastOnlineTimeRange  []time.Time `json:"scriptLastOnlineTimeRange" form:"scriptLastOnlineTimeRange[]"`
+	RoleLastOnlineTimeRange    []time.Time `json:"roleLastOnlineTimeRange" form:"roleLastOnlineTimeRange[]"`
+	RoleGameId                 *string     `json:"roleGameId" form:"roleGameId"`
+	ServerZoneId               *string     `json:"serverZoneId" form:"serverZoneId"`
+	LastIngotTradeTimeRange    []time.Time `json:"lastIngotTradeTimeRange" form:"lastIngotTradeTimeRange[]"`
+	LastTalismanTradeTimeRange []time.Time `json:"lastTalismanTradeTimeRange" form:"lastTalismanTradeTimeRange[]"`
+	OnlineTalismanTotal        *int        `json:"onlineTalismanTotal" form:"onlineTalismanTotal"`
+	OnlineIngotTotal           *int        `json:"onlineIngotTotal" form:"onlineIngotTotal"`
 	request.PageInfo
 	Sort  string `json:"sort" form:"sort"`
 	Order string `json:"order" form:"order"`

@@ -5,11 +5,11 @@ import (
 	"compress/gzip"
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/service/gameManage/request"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -21,15 +21,12 @@ type GameManager struct {
 
 // NewGameManager 创建一个新的GameManager实例
 // 可传入初始cookie，若为空则使用默认cookie
-func NewGameManager(initialCookie string) (*GameManager, error) {
-	// 检查cookie是否为空
-	if strings.TrimSpace(initialCookie) == "" {
-		return nil, errors.New("必须提供有效的cookie，不能为空")
-	}
+func NewGameManager(initialCookie string) *GameManager {
+
 	// 返回初始化后的实例
 	return &GameManager{
 		cookie: initialCookie,
-	}, nil
+	}
 }
 
 // SetCookie 设置当前实例使用的cookie

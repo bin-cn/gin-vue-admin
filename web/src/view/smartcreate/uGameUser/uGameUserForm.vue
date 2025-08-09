@@ -49,6 +49,60 @@
         <el-form-item label="灵符总数:" prop="totalTalisman">
     <el-input v-model.number="formData.totalTalisman" :clearable="true" placeholder="请输入灵符总数" />
 </el-form-item>
+       <el-form-item label="角色在线状态:" prop="roleOnlineStatus">
+    <el-select v-model="formData.roleOnlineStatus" placeholder="请选择角色在线状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+        <el-form-item label="脚本在线状态:" prop="scriptOnlineStatus">
+    <el-select v-model="formData.scriptOnlineStatus" placeholder="请选择脚本在线状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+        <el-form-item label="封号状态:" prop="bannedStatus">
+    <el-select v-model="formData.bannedStatus" placeholder="请选择封号状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in BannedStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+        <el-form-item label="灵符变动差异:" prop="talismanDiff">
+    <el-input v-model.number="formData.talismanDiff" :clearable="true" placeholder="请输入灵符变动差异" />
+</el-form-item>
+        <el-form-item label="元宝变动差异:" prop="ingotDiff">
+    <el-input v-model.number="formData.ingotDiff" :clearable="true" placeholder="请输入元宝变动差异" />
+</el-form-item>
+        <el-form-item label="最后一次同步查询时间:" prop="lastSyncQueryTime">
+    <el-date-picker v-model="formData.lastSyncQueryTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="最后一次同步更新时间:" prop="lastSyncUpdateTime">
+    <el-date-picker v-model="formData.lastSyncUpdateTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="脚本最后在线时间:" prop="scriptLastOnlineTime">
+    <el-date-picker v-model="formData.scriptLastOnlineTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="角色最后在线时间:" prop="roleLastOnlineTime">
+    <el-date-picker v-model="formData.roleLastOnlineTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="游戏角色ID:" prop="roleGameId">
+    <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
+</el-form-item>
+        <el-form-item label="原始区服ID:" prop="serverZoneId">
+    <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入原始区服ID" />
+</el-form-item>
+        <el-form-item label="最后一次交易元宝变动时间:" prop="lastIngotTradeTime">
+    <el-date-picker v-model="formData.lastIngotTradeTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="最后一次交易灵符时间:" prop="lastTalismanTradeTime">
+    <el-date-picker v-model="formData.lastTalismanTradeTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+        <el-form-item label="线上灵符总数:" prop="onlineTalismanTotal">
+    <el-input v-model.number="formData.onlineTalismanTotal" :clearable="true" placeholder="请输入线上灵符总数" />
+</el-form-item>
+        <el-form-item label="线上元宝总数:" prop="onlineIngotTotal">
+    <el-input v-model.number="formData.onlineIngotTotal" :clearable="true" placeholder="请输入线上元宝总数" />
+</el-form-item>
+        <el-form-item label="最后一次线上查询时间:" prop="lastOnlineQueryTime">
+    <el-date-picker v-model="formData.lastOnlineQueryTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
         <el-form-item>
           <el-button :loading="btnLoading" type="primary" @click="save">保存</el-button>
           <el-button type="primary" @click="back">返回</el-button>
@@ -82,6 +136,9 @@ const router = useRouter()
 
 // 提交按钮loading
 const btnLoading = ref(false)
+// 字典增加如下代码
+const BannedStatusOptions = ref([])
+const OnlineStatusOptions = ref([])
 
 const type = ref('')
 const formData = ref({
@@ -98,6 +155,22 @@ const formData = ref({
             totalTalisman: undefined,
             gameServerName: '',
             gameServerId: undefined,
+             roleOnlineStatus: '',
+            scriptOnlineStatus: '',
+            bannedStatus: '',
+            talismanDiff: undefined,
+            ingotDiff: undefined,
+            lastSyncQueryTime: new Date(),
+            lastSyncUpdateTime: new Date(),
+            scriptLastOnlineTime: new Date(),
+            roleLastOnlineTime: new Date(),
+            roleGameId: '',
+            serverZoneId: '',
+            lastIngotTradeTime: new Date(),
+            lastTalismanTradeTime: new Date(),
+            onlineTalismanTotal: undefined,
+            onlineIngotTotal: undefined,
+            lastOnlineQueryTime: new Date(),
         })
 // 验证规则
 const rule = reactive({
@@ -136,6 +209,9 @@ const elFormRef = ref()
 
 // 初始化方法
 const init = async () => {
+    BannedStatusOptions.value = await getDictFunc('BannedStatus')
+    OnlineStatusOptions.value = await getDictFunc('OnlineStatus')
+
  // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
     if (route.query.id) {
       const res = await findGameUser({ ID: route.query.id })
@@ -146,6 +222,7 @@ const init = async () => {
     } else {
       type.value = 'create'
     }
+
 }
 
 init()

@@ -10,6 +10,7 @@ func InitJob() {
 		"ExamplesOne":    ExamplesOne{},
 		"ClearTableTask": ClearTableTask{},
 		// ...
-		"MyCustomTask": MyCustomTask{}, // 添加您的任务
+		"MyCustomTask":   MyCustomTask{}, // 添加您的任务
+		"ListServerTask": ListServerTask{},
 	}
 }

@@ -78,8 +78,133 @@
   <el-form-item label="区服名称" prop="gameServerName">
   <el-input v-model="searchInfo.gameServerName" placeholder="搜索条件" />
 </el-form-item>
+
+<el-form-item label="角色在线状态" prop="roleOnlineStatus">
+  <el-select v-model="searchInfo.roleOnlineStatus" clearable filterable placeholder="请选择" @clear="()=>{searchInfo.roleOnlineStatus=undefined}">
+    <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+  </el-select>
+</el-form-item>
     
 
+<el-form-item label="脚本在线状态" prop="scriptOnlineStatus">
+  <el-select v-model="searchInfo.scriptOnlineStatus" clearable filterable placeholder="请选择" @clear="()=>{searchInfo.scriptOnlineStatus=undefined}">
+    <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+  </el-select>
+</el-form-item>
+    
+
+<el-form-item label="封号状态" prop="bannedStatus">
+  <el-select v-model="searchInfo.bannedStatus" clearable filterable placeholder="请选择" @clear="()=>{searchInfo.bannedStatus=undefined}">
+    <el-option v-for="(item,key) in BannedStatusOptions" :key="key" :label="item.label" :value="item.value" />
+  </el-select>
+</el-form-item>
+    
+
+<el-form-item label="灵符变动差异" prop="talismanDiff">
+  <el-input class="w-40" v-model.number="searchInfo.startTalismanDiff" placeholder="最小值" />
+  —
+  <el-input class="w-40" v-model.number="searchInfo.endTalismanDiff" placeholder="最大值" />
+</el-form-item>
+    
+
+<el-form-item label="元宝变动差异" prop="ingotDiff">
+  <el-input class="w-40" v-model.number="searchInfo.startIngotDiff" placeholder="最小值" />
+  —
+  <el-input class="w-40" v-model.number="searchInfo.endIngotDiff" placeholder="最大值" />
+</el-form-item>
+    
+
+<el-form-item label="最后一次同步查询时间" prop="lastSyncQueryTime">
+  <template #label>
+    <span>
+      最后一次同步查询时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncQueryTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="最后一次同步更新时间" prop="lastSyncUpdateTime">
+  <template #label>
+    <span>
+      最后一次同步更新时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncUpdateTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="脚本最后在线时间" prop="scriptLastOnlineTime">
+  <template #label>
+    <span>
+      脚本最后在线时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.scriptLastOnlineTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="角色最后在线时间" prop="roleLastOnlineTime">
+  <template #label>
+    <span>
+      角色最后在线时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.roleLastOnlineTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="游戏角色ID" prop="roleGameId">
+  <el-input v-model="searchInfo.roleGameId" placeholder="搜索条件" />
+</el-form-item>
+    
+
+<el-form-item label="原始区服ID" prop="serverZoneId">
+  <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
+</el-form-item>
+    
+
+<el-form-item label="最后一次交易元宝变动时间" prop="lastIngotTradeTime">
+  <template #label>
+    <span>
+      最后一次交易元宝变动时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.lastIngotTradeTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="最后一次交易灵符时间" prop="lastTalismanTradeTime">
+  <template #label>
+    <span>
+      最后一次交易灵符时间
+      <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+        <el-icon><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </span>
+  </template>
+<el-date-picker class="w-[380px]" v-model="searchInfo.lastTalismanTradeTimeRange" type="datetimerange" range-separator="至"  start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+    
+
+<el-form-item label="线上灵符总数" prop="onlineTalismanTotal">
+  <el-input v-model.number="searchInfo.onlineTalismanTotal" placeholder="搜索条件" />
+</el-form-item>
+    
+
+<el-form-item label="线上元宝总数" prop="onlineIngotTotal">
+  <el-input v-model.number="searchInfo.onlineIngotTotal" placeholder="搜索条件" />
+</el-form-item>
+    
 <el-form-item label="区服ID" prop="gameServerId">
   <el-input class="w-40" v-model.number="searchInfo.startGameServerId" placeholder="最小值" />
   —
@@ -127,11 +252,13 @@
         <el-table-column sortable align="left" label="区服ID" prop="gameServerId" width="120" />
 
 
-            <el-table-column sortable align="left" label="用户昵称" prop="nickName" width="120">
-    <template #default="scope">
-        <span>{{ filterDataSource(dataSource.nickName,scope.row.nickName) }}</span>
-    </template>
-</el-table-column>
+        <el-table-column sortable align="left" label="用户昵称" prop="nickName" width="120">
+                <template #default="scope">
+                    <span>{{ filterDataSource(dataSource.nickName,scope.row.nickName) }}</span>
+                </template>
+        </el-table-column>
+
+
             <el-table-column align="left" label="登录码" prop="loginCode" width="120" />
 
             <el-table-column align="left" label="游戏角色名称" prop="roleGameName" width="120" />
@@ -139,10 +266,63 @@
             <el-table-column sortable align="left" label="游戏角色等级" prop="roleGameLevel" width="120" />
 
             <el-table-column align="left" label="用户ID" prop="userId" width="120">
-    <template #default="scope">
+             <template #default="scope">
         <span>{{ filterDataSource(dataSource.userId,scope.row.userId) }}</span>
     </template>
 </el-table-column>
+
+            <el-table-column sortable align="left" label="角色在线状态" prop="roleOnlineStatus" width="120">
+                <template #default="scope">
+                {{ filterDict(scope.row.roleOnlineStatus,OnlineStatusOptions) }}
+                </template>
+          </el-table-column>
+
+
+       <el-table-column sortable align="left" label="脚本在线状态" prop="scriptOnlineStatus" width="120">
+          <template #default="scope">
+          {{ filterDict(scope.row.scriptOnlineStatus,OnlineStatusOptions) }}
+          </template>
+      </el-table-column>
+       <el-table-column sortable align="left" label="封号状态" prop="bannedStatus" width="120">
+    <template #default="scope">
+    {{ filterDict(scope.row.bannedStatus,BannedStatusOptions) }}
+    </template>
+</el-table-column>
+       <el-table-column sortable align="left" label="灵符变动差异" prop="talismanDiff" width="120" />
+
+       <el-table-column sortable align="left" label="元宝变动差异" prop="ingotDiff" width="120" />
+
+       <el-table-column sortable align="left" label="最后一次同步查询时间" prop="lastSyncQueryTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.lastSyncQueryTime) }}</template>
+</el-table-column>
+       <el-table-column sortable align="left" label="最后一次同步更新时间" prop="lastSyncUpdateTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.lastSyncUpdateTime) }}</template>
+</el-table-column>
+       <el-table-column sortable align="left" label="脚本最后在线时间" prop="scriptLastOnlineTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.scriptLastOnlineTime) }}</template>
+</el-table-column>
+       <el-table-column sortable align="left" label="角色最后在线时间" prop="roleLastOnlineTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.roleLastOnlineTime) }}</template>
+</el-table-column>
+       <el-table-column align="left" label="游戏角色ID" prop="roleGameId" width="120" />
+
+       <el-table-column sortable align="left" label="原始区服ID" prop="serverZoneId" width="120" />
+
+       <el-table-column sortable align="left" label="最后一次交易元宝变动时间" prop="lastIngotTradeTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.lastIngotTradeTime) }}</template>
+</el-table-column>
+       <el-table-column sortable align="left" label="最后一次交易灵符时间" prop="lastTalismanTradeTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.lastTalismanTradeTime) }}</template>
+</el-table-column>
+       <el-table-column sortable align="left" label="线上灵符总数" prop="onlineTalismanTotal" width="120" />
+
+       <el-table-column sortable align="left" label="线上元宝总数" prop="onlineIngotTotal" width="120" />
+
+       <el-table-column align="left" label="最后一次线上查询时间" prop="lastOnlineQueryTime" width="180">
+   <template #default="scope">{{ formatDate(scope.row.lastOnlineQueryTime) }}</template>
+</el-table-column>   
+              
+   
             <el-table-column sortable align="left" label="未绑定元宝数量" prop="unBoundIngotQuantity" width="120" />
 
             <el-table-column sortable align="left" label="绑定元宝数量" prop="boundIngotQuantity" width="120" />
@@ -154,7 +334,7 @@
             <el-table-column sortable align="left" label="绑定灵符" prop="boundTalisman" width="120" />
 
             <el-table-column sortable align="left" label="灵符总数" prop="totalTalisman" width="120" />
-
+            
         <el-table-column align="left" label="操作" fixed="right" :min-width="appStore.operateMinWith">
             <template #default="scope">
             <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看</el-button>
@@ -232,6 +412,63 @@
             <el-form-item label="灵符总数:" prop="totalTalisman">
     <el-input v-model.number="formData.totalTalisman" :clearable="true" placeholder="请输入灵符总数" />
 </el-form-item>
+ <el-form-item label="角色在线状态:" prop="roleOnlineStatus">
+    <el-select v-model="formData.roleOnlineStatus" placeholder="请选择角色在线状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+     <el-form-item label="脚本在线状态:" prop="scriptOnlineStatus">
+    <el-select v-model="formData.scriptOnlineStatus" placeholder="请选择脚本在线状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in OnlineStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+     <el-form-item label="封号状态:" prop="bannedStatus">
+    <el-select v-model="formData.bannedStatus" placeholder="请选择封号状态" style="width:100%" filterable :clearable="true">
+        <el-option v-for="(item,key) in BannedStatusOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+     <el-form-item label="灵符变动差异:" prop="talismanDiff">
+    <el-input v-model.number="formData.talismanDiff" :clearable="true" placeholder="请输入灵符变动差异" />
+</el-form-item>
+     <el-form-item label="元宝变动差异:" prop="ingotDiff">
+    <el-input v-model.number="formData.ingotDiff" :clearable="true" placeholder="请输入元宝变动差异" />
+</el-form-item>
+     <el-form-item label="最后一次同步查询时间:" prop="lastSyncQueryTime">
+    <el-date-picker v-model="formData.lastSyncQueryTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="最后一次同步更新时间:" prop="lastSyncUpdateTime">
+    <el-date-picker v-model="formData.lastSyncUpdateTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="脚本最后在线时间:" prop="scriptLastOnlineTime">
+    <el-date-picker v-model="formData.scriptLastOnlineTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="角色最后在线时间:" prop="roleLastOnlineTime">
+    <el-date-picker v-model="formData.roleLastOnlineTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="游戏角色ID:" prop="roleGameId">
+    <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
+</el-form-item>
+     <el-form-item label="原始区服ID:" prop="serverZoneId">
+    <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入原始区服ID" />
+</el-form-item>
+     <el-form-item label="最后一次交易元宝变动时间:" prop="lastIngotTradeTime">
+    <el-date-picker v-model="formData.lastIngotTradeTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="最后一次交易灵符时间:" prop="lastTalismanTradeTime">
+    <el-date-picker v-model="formData.lastTalismanTradeTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+     <el-form-item label="线上灵符总数:" prop="onlineTalismanTotal">
+    <el-input v-model.number="formData.onlineTalismanTotal" :clearable="true" placeholder="请输入线上灵符总数" />
+</el-form-item>
+     <el-form-item label="线上元宝总数:" prop="onlineIngotTotal">
+    <el-input v-model.number="formData.onlineIngotTotal" :clearable="true" placeholder="请输入线上元宝总数" />
+</el-form-item>
+     <el-form-item label="最后一次线上查询时间:" prop="lastOnlineQueryTime">
+    <el-date-picker v-model="formData.lastOnlineQueryTime" type="date" style="width:100%" placeholder="选择日期" :clearable="true" />
+</el-form-item>
+
+
+
           </el-form>
     </el-drawer>
 
@@ -283,6 +520,57 @@
                     <el-descriptions-item label="灵符总数">
     {{ detailForm.totalTalisman }}
 </el-descriptions-item>
+
+// 查看抽屉中增加如下代码
+    <el-descriptions-item label="角色在线状态">
+    {{ detailForm.roleOnlineStatus }}
+</el-descriptions-item>
+    <el-descriptions-item label="脚本在线状态">
+    {{ detailForm.scriptOnlineStatus }}
+</el-descriptions-item>
+    <el-descriptions-item label="封号状态">
+    {{ detailForm.bannedStatus }}
+</el-descriptions-item>
+    <el-descriptions-item label="灵符变动差异">
+    {{ detailForm.talismanDiff }}
+</el-descriptions-item>
+    <el-descriptions-item label="元宝变动差异">
+    {{ detailForm.ingotDiff }}
+</el-descriptions-item>
+    <el-descriptions-item label="最后一次同步查询时间">
+    {{ detailForm.lastSyncQueryTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="最后一次同步更新时间">
+    {{ detailForm.lastSyncUpdateTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="脚本最后在线时间">
+    {{ detailForm.scriptLastOnlineTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="角色最后在线时间">
+    {{ detailForm.roleLastOnlineTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="游戏角色ID">
+    {{ detailForm.roleGameId }}
+</el-descriptions-item>
+    <el-descriptions-item label="原始区服ID">
+    {{ detailForm.serverZoneId }}
+</el-descriptions-item>
+    <el-descriptions-item label="最后一次交易元宝变动时间">
+    {{ detailForm.lastIngotTradeTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="最后一次交易灵符时间">
+    {{ detailForm.lastTalismanTradeTime }}
+</el-descriptions-item>
+    <el-descriptions-item label="线上灵符总数">
+    {{ detailForm.onlineTalismanTotal }}
+</el-descriptions-item>
+    <el-descriptions-item label="线上元宝总数">
+    {{ detailForm.onlineIngotTotal }}
+</el-descriptions-item>
+    <el-descriptions-item label="最后一次线上查询时间">
+    {{ detailForm.lastOnlineQueryTime }}
+</el-descriptions-item>
+
             </el-descriptions>
         </el-drawer>
 
@@ -324,6 +612,10 @@ const appStore = useAppStore()
 
 // 控制更多查询条件显示/隐藏状态
 const showAllQuery = ref(false)
+// 字典增加如下代码
+const BannedStatusOptions = ref([])
+const OnlineStatusOptions = ref([])
+
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -338,6 +630,22 @@ const formData = ref({
             unBoundTalisman: undefined,
             boundTalisman: undefined,
             totalTalisman: undefined,
+            roleOnlineStatus: '',
+            scriptOnlineStatus: '',
+            bannedStatus: '',
+            talismanDiff: undefined,
+            ingotDiff: undefined,
+            lastSyncQueryTime: new Date(),
+            lastSyncUpdateTime: new Date(),
+            scriptLastOnlineTime: new Date(),
+            roleLastOnlineTime: new Date(),
+            roleGameId: '',
+            serverZoneId: '',
+            lastIngotTradeTime: new Date(),
+            lastTalismanTradeTime: new Date(),
+            onlineTalismanTotal: undefined,
+            onlineIngotTotal: undefined,
+            lastOnlineQueryTime: new Date(),
         })
   const dataSource = ref([])
   const getDataSourceFunc = async()=>{
@@ -466,6 +774,9 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
+  BannedStatusOptions.value = await getDictFunc('BannedStatus')
+  OnlineStatusOptions.value = await getDictFunc('OnlineStatus')
+
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -578,6 +889,22 @@ const closeDialog = () => {
         totalTalisman: undefined,
         gameServerName: '',
         gameServerId: undefined,
+        roleOnlineStatus: '',
+            scriptOnlineStatus: '',
+            bannedStatus: '',
+            talismanDiff: undefined,
+            ingotDiff: undefined,
+            lastSyncQueryTime: new Date(),
+            lastSyncUpdateTime: new Date(),
+            scriptLastOnlineTime: new Date(),
+            roleLastOnlineTime: new Date(),
+            roleGameId: '',
+            serverZoneId: '',
+            lastIngotTradeTime: new Date(),
+            lastTalismanTradeTime: new Date(),
+            onlineTalismanTotal: undefined,
+            onlineIngotTotal: undefined,
+            lastOnlineQueryTime: new Date(),
         }
 }
 // 弹窗确定

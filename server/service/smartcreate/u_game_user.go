@@ -114,6 +114,52 @@ func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context
 		db = db.Where("game_server_id BETWEEN ? AND ? ", *info.StartGameServerId, *info.EndGameServerId)
 	}
 
+	if info.RoleOnlineStatus != nil && *info.RoleOnlineStatus != "" {
+		db = db.Where("role_online_status = ?", *info.RoleOnlineStatus)
+	}
+	if info.ScriptOnlineStatus != nil && *info.ScriptOnlineStatus != "" {
+		db = db.Where("script_online_status = ?", *info.ScriptOnlineStatus)
+	}
+	if info.BannedStatus != nil && *info.BannedStatus != "" {
+		db = db.Where("banned_status = ?", *info.BannedStatus)
+	}
+	if info.StartTalismanDiff != nil && info.EndTalismanDiff != nil {
+		db = db.Where("talisman_diff BETWEEN ? AND ? ", *info.StartTalismanDiff, *info.EndTalismanDiff)
+	}
+	if info.StartIngotDiff != nil && info.EndIngotDiff != nil {
+		db = db.Where("ingot_diff BETWEEN ? AND ? ", *info.StartIngotDiff, *info.EndIngotDiff)
+	}
+	if len(info.LastSyncQueryTimeRange) == 2 {
+		db = db.Where("last_sync_query_time BETWEEN ? AND ? ", info.LastSyncQueryTimeRange[0], info.LastSyncQueryTimeRange[1])
+	}
+	if len(info.LastSyncUpdateTimeRange) == 2 {
+		db = db.Where("last_sync_update_time BETWEEN ? AND ? ", info.LastSyncUpdateTimeRange[0], info.LastSyncUpdateTimeRange[1])
+	}
+	if len(info.ScriptLastOnlineTimeRange) == 2 {
+		db = db.Where("script_last_online_time BETWEEN ? AND ? ", info.ScriptLastOnlineTimeRange[0], info.ScriptLastOnlineTimeRange[1])
+	}
+	if len(info.RoleLastOnlineTimeRange) == 2 {
+		db = db.Where("role_last_online_time BETWEEN ? AND ? ", info.RoleLastOnlineTimeRange[0], info.RoleLastOnlineTimeRange[1])
+	}
+	if info.RoleGameId != nil && *info.RoleGameId != "" {
+		db = db.Where("role_game_id = ?", *info.RoleGameId)
+	}
+	if info.ServerZoneId != nil && *info.ServerZoneId != "" {
+		db = db.Where("server_zone_id = ?", *info.ServerZoneId)
+	}
+	if len(info.LastIngotTradeTimeRange) == 2 {
+		db = db.Where("last_ingot_trade_time BETWEEN ? AND ? ", info.LastIngotTradeTimeRange[0], info.LastIngotTradeTimeRange[1])
+	}
+	if len(info.LastTalismanTradeTimeRange) == 2 {
+		db = db.Where("last_talisman_trade_time BETWEEN ? AND ? ", info.LastTalismanTradeTimeRange[0], info.LastTalismanTradeTimeRange[1])
+	}
+	if info.OnlineTalismanTotal != nil {
+		db = db.Where("online_talisman_total > ?", *info.OnlineTalismanTotal)
+	}
+	if info.OnlineIngotTotal != nil {
+		db = db.Where("online_ingot_total > ?", *info.OnlineIngotTotal)
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
@@ -133,7 +179,20 @@ func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context
 	// GetGameUserInfoList 新增排序语句 请自行在搜索语句中添加orderMap内容
 	orderMap["game_server_name"] = true
 	orderMap["game_server_id"] = true
-
+	orderMap["role_online_status"] = true
+	orderMap["script_online_status"] = true
+	orderMap["banned_status"] = true
+	orderMap["talisman_diff"] = true
+	orderMap["ingot_diff"] = true
+	orderMap["last_sync_query_time"] = true
+	orderMap["last_sync_update_time"] = true
+	orderMap["script_last_online_time"] = true
+	orderMap["role_last_online_time"] = true
+	orderMap["server_zone_id"] = true
+	orderMap["last_ingot_trade_time"] = true
+	orderMap["last_talisman_trade_time"] = true
+	orderMap["online_talisman_total"] = true
+	orderMap["online_ingot_total"] = true
 	if orderMap[info.Sort] {
 		OrderStr = info.Sort
 		if info.Order == "descending" {
