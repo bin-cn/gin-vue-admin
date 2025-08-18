@@ -23,8 +23,8 @@
           />
        </el-form-item>
       
-            <el-form-item label="主区服服务器ID" prop="mainServerZoneId">
-  <el-input v-model="searchInfo.mainServerZoneId" placeholder="搜索条件" />
+            <el-form-item label="主区服服务器ID" prop="mainServerId">
+  <el-input v-model="searchInfo.mainServerId" placeholder="搜索条件" />
 </el-form-item>
             
             <el-form-item label="主区服ID" prop="mainServerZoneId">
@@ -77,7 +77,7 @@
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         
-            <el-table-column sortable align="left" label="主区服服务器ID" prop="mainServerZoneId" width="120" />
+            <el-table-column sortable align="left" label="主区服服务器ID" prop="mainServerId" width="120" />
 
             <el-table-column sortable align="left" label="主区服ID" prop="mainServerZoneId" width="120" />
 
@@ -119,8 +119,8 @@
             </template>
 
           <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="主区服服务器ID:" prop="mainServerZoneId">
-    <el-input v-model="formData.mainServerZoneId" :clearable="true" placeholder="请输入主区服服务器ID" />
+            <el-form-item label="主区服服务器ID:" prop="mainServerId">
+    <el-input v-model="formData.mainServerId" :clearable="true" placeholder="请输入主区服服务器ID" />
 </el-form-item>
             <el-form-item label="主区服ID:" prop="mainServerZoneId">
     <el-input v-model="formData.mainServerZoneId" :clearable="true" placeholder="请输入主区服ID" />
@@ -140,7 +140,7 @@
     <el-drawer destroy-on-close :size="appStore.drawerSize" v-model="detailShow" :show-close="true" :before-close="closeDetailShow" title="查看">
             <el-descriptions :column="1" border>
                     <el-descriptions-item label="主区服服务器ID">
-    {{ detailForm.mainServerZoneId }}
+    {{ detailForm.mainServerId }}
 </el-descriptions-item>
                     <el-descriptions-item label="主区服ID">
     {{ detailForm.mainServerZoneId }}
@@ -192,7 +192,7 @@ const showAllQuery = ref(false)
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-            mainServerZoneId: '',
+            mainServerId: '',
             mainServerZoneId: '',
             serverId: '',
             serverZoneId: '',
@@ -219,7 +219,7 @@ const sortChange = ({ prop, order }) => {
   const sortMap = {
     CreatedAt:"CreatedAt",
     ID:"ID",
-            mainServerZoneId: 'main_server_zone_id',
+            mainServerId: 'mainServerId',
             mainServerZoneId: 'main_server_zone_id',
             serverId: 'server_id',
             serverZoneId: 'server_zone_id',
@@ -378,7 +378,7 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        mainServerZoneId: '',
+        mainServerId: '',
         mainServerZoneId: '',
         serverId: '',
         serverZoneId: '',

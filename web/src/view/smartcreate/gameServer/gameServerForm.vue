@@ -3,8 +3,8 @@
   <div>
     <div class="gva-form-box">
       <el-form :model="formData" ref="elFormRef" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="主区服服务器ID:" prop="mainServerZoneId">
-    <el-input v-model="formData.mainServerZoneId" :clearable="true" placeholder="请输入主区服服务器ID" />
+        <el-form-item label="主区服服务器ID:" prop="mainServerId">
+    <el-input v-model="formData.mainServerId" :clearable="true" placeholder="请输入主区服服务器ID" />
 </el-form-item>
         <el-form-item label="主区服ID:" prop="mainServerZoneId">
     <el-input v-model="formData.mainServerZoneId" :clearable="true" placeholder="请输入主区服ID" />
@@ -53,7 +53,7 @@ const btnLoading = ref(false)
 
 const type = ref('')
 const formData = ref({
-            mainServerZoneId: '',
+            mainServerId: '',
             mainServerZoneId: '',
             serverId: '',
             serverZoneId: '',
