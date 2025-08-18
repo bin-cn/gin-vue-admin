@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/service/gameManage/request"
@@ -322,6 +323,14 @@ func (gm *GameManager) OneList(sid string, isMaster bool) ([]CSVPlayer, error) {
 	return players, nil
 }
 
+func buildEncodedURL(baseURL string, params map[string]string) string {
+	values := url.Values{}
+	for key, value := range params {
+		values.Set(key, value)
+	}
+	return baseURL + "?" + values.Encode()
+}
+
 // GetPlayerActions 获取玩家行为数据
 // rolename: 角色名
 // roleid: 角色ID
@@ -329,13 +338,35 @@ func (gm *GameManager) OneList(sid string, isMaster bool) ([]CSVPlayer, error) {
 // endtime: 结束时间(格式: 2025-08-04+20%3A35)，为空则使用默认时间
 // item: 物品(格式: 20%3A%E5%85%83%E5%AE%9D)，会自动进行URL编码
 // 返回值: 玩家行为数据数组和可能的错误
-func (gm *GameManager) GetPlayerActions(starttime, endtime, item string) ([]PlayerAction, error) {
-	urlStr := "http://ht.sqdk.yuhetx.net/player/action"
+func (gm *GameManager) GetPlayerActions(starttime, endtime, item, serverId string) ([]PlayerAction, error) {
+	urlStr := "http://ht.sqdk.yuhetx.net/default/server"
+	RefererUrl := "http://ht.sqdk.yuhetx.net/player/action"
+
 	method := "GET"
 
 	// 处理时间参数，如果为空则使用默认时间范围(最近10分钟)
 	if starttime == "" || endtime == "" {
 		starttime, endtime = BuildTime(1) // 默认使用1，表示最近10分钟
+	}
+
+	// 设置请求参数
+	RefererParams := map[string]string{
+		"rolename":  "",
+		"roleid":    "",
+		"starttime": starttime,
+		"endtime":   endtime,
+		"item":      item,
+		"type":      "",
+		"makeid":    "",
+		"action":    "searchAction",
+		"export":    "1",
+	}
+
+	encodedRefererUrl := buildEncodedURL(RefererUrl, RefererParams)
+
+	params := map[string]string{
+		"oper": "ad_93772",
+		"sid":  serverId,
 	}
 
 	// 格式化物品参数
@@ -349,22 +380,9 @@ func (gm *GameManager) GetPlayerActions(starttime, endtime, item string) ([]Play
 		"Connection":                "keep-alive",
 		"Cookie":                    gm.cookie,
 		"Host":                      "ht.sqdk.yuhetx.net",
-		"Referer":                   "http://ht.sqdk.yuhetx.net/player/action",
+		"Referer":                   encodedRefererUrl,
 		"Upgrade-Insecure-Requests": "1",
 		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-	}
-
-	// 设置请求参数
-	params := map[string]string{
-		"rolename":  "",
-		"roleid":    "",
-		"starttime": starttime,
-		"endtime":   endtime,
-		"item":      item,
-		"type":      "",
-		"makeid":    "",
-		"action":    "searchAction",
-		"export":    "1",
 	}
 
 	// 发送请求

@@ -58,6 +58,12 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 
 	// 开始事务
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// 预加载game_server数据到map，提高效率
+		serverMap, err := s.loadGameServerMap(tx)
+		if err != nil {
+			return fmt.Errorf("预加载游戏服务器数据失败: %w", err)
+		}
+
 		// 批量查询用户数据
 		userMap, err := s.getUserMapByNickNames(tx, assignerNames)
 		if err != nil {
@@ -182,6 +188,12 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 			gameServerId := s.parseInt(s.getCellValue(row, columnMap, "区服ID"))
 			if gameServerId > 0 {
 				authCode.GameServerId = &gameServerId
+
+				// 新增：从预加载的map中获取main_server_zone_id
+				if serverInfo, exists := serverMap[gameServerId]; exists && serverInfo.MainServerZoneId != nil {
+					// 直接使用MainServerZoneId（已经是*string类型）
+					authCode.MainServerZone = serverInfo.MainServerZoneId
+				}
 			}
 
 			serverOpenTime := s.getCellValue(row, columnMap, "开服时间")
@@ -200,24 +212,47 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 			}
 
 			// 设置默认值
-			accountStatus := "InUse"
-			authCode.AccountStatus = &accountStatus
+			now := time.Now()
+			authCode.CreatedAt = now
+			authCode.UpdatedAt = now
 
-			// 添加到批量插入列表
 			authCodes = append(authCodes, authCode)
 		}
 
-		// 批量插入记录
+		// 批量创建记录
 		if len(authCodes) > 0 {
-			if err := tx.CreateInBatches(authCodes, 100).Error; err != nil {
-				return fmt.Errorf("批量插入记录失败: %w", err)
+			if err := tx.Create(&authCodes).Error; err != nil {
+				return fmt.Errorf("批量创建授权码记录失败: %w", err)
 			}
+			fmt.Printf("成功批量创建 %d 条授权码记录", len(authCodes))
 		}
 
 		return nil
 	})
 
 	return err
+}
+
+// loadGameServerMap 预加载game_server数据到map，提高效率
+func (s *GameUserAuthCodeImportService) loadGameServerMap(tx *gorm.DB) (map[int]*smartcreate.GameServer, error) {
+	var servers []smartcreate.GameServer
+	err := tx.Find(&servers).Error
+	if err != nil {
+		return nil, err
+	}
+
+	serverMap := make(map[int]*smartcreate.GameServer)
+	for i := range servers {
+		server := &servers[i]
+		if server.ServerZoneId != nil {
+			// 将string类型的server_zone_id转换为int
+			var zoneId int
+			fmt.Sscanf(*server.ServerZoneId, "%d", &zoneId)
+			serverMap[zoneId] = server
+		}
+	}
+
+	return serverMap, nil
 }
 
 // generateUniqueLoginCode 生成唯一的登录码
