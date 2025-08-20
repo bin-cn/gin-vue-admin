@@ -286,7 +286,7 @@ func diff_update_data(
 			}
 
 			// 创建新的GameUser记录，从GameUserAuthCode复制相关字段
-			ServerZoneId := string(*authCode.GameServerId)
+			ServerZoneId := strconv.Itoa(*authCode.GameServerId)
 			newUser := sc.GameUser{
 				RoleGameId:           authCode.RoleGameId,
 				NickName:             authCode.AssignerName, // 使用游戏角色名称作为昵称
