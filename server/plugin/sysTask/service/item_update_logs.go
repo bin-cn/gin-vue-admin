@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -14,7 +15,18 @@ import (
 	service "github.com/flipped-aurora/gin-vue-admin/server/service/smartcreate"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+type MyError struct {
+	Code int
+	Msg  string
+}
+
+// 实现 error 接口
+func (e *MyError) Error() string {
+	return e.Msg
+}
 
 type ItemUpdateLogs struct{}
 
@@ -52,7 +64,7 @@ func verifyItemUpdateLogsData(arg interface{}) (*gameManage.GameManager, error) 
 func (t ItemUpdateLogs) Exec(arg interface{}) error {
 	//arg 是字符串用逗号分隔的,需要解析为数组对象
 	argStr := arg.(string)
-	argArr := strings.Split(argStr, ",")
+	argArr := strings.Split(argStr, "|")
 	if len(argArr) != 2 {
 		return fmt.Errorf("物品更新日志任务参数错误,参数格式: 任务ID,角色ID")
 	}
@@ -75,74 +87,119 @@ func (t ItemUpdateLogs) Exec(arg interface{}) error {
 	if err != nil {
 		return fmt.Errorf("buildTileId转换失败: %v", err)
 	}
-	startTime, endTime := gameManage.BuildTime(int(minutes))
 
+	//2. mainServerZones    这里拿到的是区服ID列表，需要从game_server表中查询对应的主区服ID,需要去重
+	var mainServerZoneIds []int
+	result = global.GVA_DB.Raw("SELECT DISTINCT main_server_id FROM gva.game_server WHERE main_server_zone_id IN ?", mainServerZones).Scan(&mainServerZoneIds)
+	if result.Error != nil {
+		return fmt.Errorf("查询game_server表中的所有main_server_zone字段值失败: %v", result.Error)
+	}
+
+	var list_errinfo []string
+
+	// 3.遍历mainServerZones，调用gm.GetPlayerActions()方法
+	for _, mainServerZone := range mainServerZoneIds {
+		mainServerZoneStr := strconv.Itoa(mainServerZone)
+		err := update_player_info_by_serverid_lock(gm, ActionTypeScheduled, mainServerZoneStr, int(minutes))
+		if err != nil {
+			var myErr *MyError
+			if errors.As(err, &myErr) {
+				msginfo := fmt.Sprintf("区服[%s],更新失败:原因是 %s", mainServerZoneStr, myErr.Msg)
+				list_errinfo = append(list_errinfo, msginfo)
+				fmt.Printf("该区服[%s]更新失败,错误码:%d,错误信息:%s", mainServerZoneStr, myErr.Code, myErr.Msg)
+				continue
+			} else {
+				return fmt.Errorf("更新区服[%s]失败: %v", mainServerZoneStr, err)
+			}
+		}
+
+	}
+
+	if len(list_errinfo) > 0 {
+		return fmt.Errorf("更新完毕,以下区服未能更新成功:%s", strings.Join(list_errinfo, ","))
+	}
+
+	return nil
+}
+
+// 包级变量：为每个 mainServerZoneStr 维护一把锁
+var zoneLocks sync.Map // key:
+// 自定义错误
+var ErrZoneLocked = errors.New("该区服正在查询中.请勿重复查询.请等待20秒.刷新页面即可")
+
+func update_player_info_by_serverid_lock(gm *gameManage.GameManager, Action_type int, mainServerZoneStr string, time_type int) error {
+	var err error
+	// 1. 取出或创建这把锁
+	lockIface, _ := zoneLocks.LoadOrStore(mainServerZoneStr, &sync.Mutex{})
+	lock := lockIface.(*sync.Mutex)
+
+	// 2. **非阻塞**加锁：如果拿不到立即返回提示
+	if !lock.TryLock() {
+		return ErrZoneLocked
+	}
+
+	var my_err error
+
+	err = update_player_info_by_serverid(gm, Action_type, UpdateTypeIngot, mainServerZoneStr, time_type)
+	if err != nil {
+		my_err = &MyError{Code: 99, Msg: "更新玩家[元宝]信息失败" + err.Error()}
+		return my_err
+	}
+
+	// err = update_player_info_by_serverid(gm, Action_type, UpdateTypeTalisman, mainServerZoneStr, time_type)
+	// if err != nil {
+	// 	my_err = &MyError{Code: 99, Msg: "更新玩家[灵符]信息失败" + err.Error()}
+	// 	return my_err
+	// }
+
+	// 3. 拿到锁后，确保最终解锁
+	defer lock.Unlock()
+
+	return err
+
+}
+
+func update_player_info_by_serverid(gm *gameManage.GameManager, Action_type int, update_type int, mainServerZoneStr string, time_type int) error {
+
+	//1.2查询出u_game_user表中的所有数据.
+	var gameUsers []smartcreate.GameUser
 	var game_user_auth_codes []smartcreate.GameUserAuthCode
+	startTime, endTime := gameManage.BuildTime(int(time_type))
+
+	var err error = nil
+	var playerActions []gameManage.PlayerAction
+
+	var item = ""
+
+	switch update_type {
+	case UpdateTypeTalisman:
+		item = "2:灵符"
+	case UpdateTypeIngot:
+		item = "20:元宝"
+	}
+
+	playerActions, err = gm.GetPlayerActions(startTime, endTime, item, mainServerZoneStr)
+	if err != nil {
+		return fmt.Errorf("获取玩家操作失败: %v", err)
+	}
+
+	if len(playerActions) == 0 {
+		return fmt.Errorf("获取玩家操作失败: 该区服没有玩家操作数据")
+	}
 
 	//1.1 查询game_user_auth_code表中的所有数据.
 	db := global.GVA_DB.Model(&smartcreate.GameUserAuthCode{})
 	err = db.Find(&game_user_auth_codes).Error
 	if err != nil {
-		return fmt.Errorf("查询game_user_auth_code表中的所有数据失败: %v", err)
+		return fmt.Errorf("查询 [授权表信息表]中的所有数据失败: %v", err)
 	}
 
-	//1.2查询出u_game_user表中的所有数据.
-	var gameUsers []smartcreate.GameUser
-
-	//2. mainServerZones    这里拿到的是区服ID列表，需要从game_server表中查询对应的主区服ID,需要去重
-
-	var mainServerZoneIds []int
-	result = global.GVA_DB.Raw("SELECT id FROM gva.game_server WHERE main_server_zone IN ?", mainServerZones).Scan(&mainServerZoneIds)
-	if result.Error != nil {
-		return fmt.Errorf("查询game_server表中的所有main_server_zone字段值失败: %v", result.Error)
+	db = global.GVA_DB.Model(&smartcreate.GameUser{})
+	err = db.Find(&gameUsers).Error
+	if err != nil {
+		return fmt.Errorf("查询[用户游戏表]表中的所有数据失败: %v", err)
 	}
-	// 去重	 mainServerZoneIds
-	// 手动实现去重逻辑
-	uniqueIds := make([]int, 0)
-	idMap := make(map[int]bool)
-	for _, id := range mainServerZoneIds {
-		if _, exists := idMap[id]; !exists {
-			idMap[id] = true
-			uniqueIds = append(uniqueIds, id)
-		}
-	}
-	mainServerZoneIds = uniqueIds
-
-	// 3..遍历mainServerZones，调用gm.GetPlayerActions()方法
-	for _, mainServerZone := range mainServerZoneIds {
-
-		mainServerZoneStr := strconv.Itoa(mainServerZone)
-
-		var playerActions []gameManage.PlayerAction
-		var err error
-		playerActions, err = gm.GetPlayerActions(startTime, endTime, "20:元宝", mainServerZoneStr)
-		if err != nil {
-			return fmt.Errorf("获取玩家操作失败: %v", err)
-		}
-
-		db = global.GVA_DB.Model(&smartcreate.GameUser{})
-		err = db.Find(&gameUsers).Error
-		if err != nil {
-			return fmt.Errorf("查询gameUsers表中的所有数据失败: %v", err)
-		}
-
-		diff_update_data(playerActions, game_user_auth_codes, gameUsers, UpdateTypeIngot, ActionTypeScheduled)
-
-		playerActions, err = gm.GetPlayerActions(startTime, endTime, "2:灵符", mainServerZoneStr)
-		if err != nil {
-			return fmt.Errorf("获取玩家操作失败: %v", err)
-		}
-
-		db = global.GVA_DB.Model(&smartcreate.GameUser{})
-		err = db.Find(&gameUsers).Error
-		if err != nil {
-			return fmt.Errorf("查询gameUsers表中的所有数据失败: %v", err)
-		}
-
-		diff_update_data(playerActions, game_user_auth_codes, gameUsers, UpdateTypeIngot, ActionTypeScheduled)
-
-	}
-
+	diff_update_data(playerActions, game_user_auth_codes, gameUsers, update_type, Action_type)
 	return nil
 }
 
@@ -164,24 +221,7 @@ func diff_update_data(
 	gameUsers []sc.GameUser,
 	update_type int,
 	Action_type int,
-) []sc.GameUser { // 返回更新后的gameUsers
-	//前提说明 玩家角色ID:  PlayerAction PlayerId 这是玩家角色ID, 对应着 GameUser中的RoleGameId   对应着 GameUserAuthCode的RoleGameId
-	//  PlayerAction 中的 ItemId 代表物品ID，20是非绑定元宝 ,2 是非绑定灵符
-	// update_type  2 表示本次更新的是非绑定灵符， 20表示本次更新的是非绑定元宝
-
-	//Action_type  1 表示为定时任务更新, 2.表示为用户手动更新 ,需要更具ItemId类型来判断来更新 CurrentCount 是当前数据 来源于PlayerAction数据中
-	//             如果是用户手动更新,则要更新这几个数据  OnlineTalismanTotal : 线上灵符总数    OnlineIngotTotal :线上元宝总数     LastOnlineQueryTime:是最后线上查询时间
-	//            如果是定时任务更新，则要更新这几个数据  UnBoundTalisman : 未绑定灵符总数    UnBoundIngotQuantity :未绑定元宝总数  TalismanDiff：CurrentCount对比UnBoundTalisman 增加或减少的数量  IngotDiff 未CurrentCount对比UnBoundIngotQuantity增加或减少的数量
-	//                                                 LastSyncQueryTime :最后同步查询时间  LastSyncUpdateTime :最后同步更新时间
-
-	// 本次是为了更新非绑定元宝 和 非绑定灵符信息,最终是为了更新 GameUser 表中的数据
-
-	// 1.playerActions以这个数组的角色ID为准，首先匹配 GameUser中 中的数据，如果有该角色ID存在则进行更新，
-	// 				如果不存在,则需要从GameUserAuthCode表中查询数据过来,如果GameUserAuthCode表中也没有,则需要跳过，如果有,则需要插入gameUsers中的数据，本身gameUsers中的数据也是从GameUserAuthCode表中查询过来的
-
-	//2.需要注意的是 PlayerAction中的PlayerId，也就是角色ID,可能会查出来多条角色ID一样的数据,因为这本身就是更新记录,如果有多条,则以Time时间最新的为准
-
-	// 1. 数据流向确认，一次性即可，如果GameUser表中已经有这个角色ID了，不需要再从GameUserAuthCode更新他的信息。
+) error { // 返回更新后的gameUsers
 	// 2.字段映射关系 ：这两张表的数据，字段一样的进行更新即可，不一样的不用处理，
 	// 3.更新优先级 ： 我都说了以GameUser表中的数据为准，他的优先级最高，
 	// 4. 数据不一致则输出错误信息，略过即可，
@@ -295,9 +335,10 @@ func diff_update_data(
 		switch Action_type {
 		case ActionTypeScheduled:
 			// 定时任务更新
-			if update_type == UpdateTypeTalisman {
+			switch update_type {
+			case UpdateTypeTalisman:
 				gameUser.UnBoundTalisman = &currentCount
-			} else if update_type == UpdateTypeIngot {
+			case UpdateTypeIngot:
 				gameUser.UnBoundIngotQuantity = &currentCount
 			}
 			gameUser.LastSyncQueryTime = &now
@@ -305,9 +346,10 @@ func diff_update_data(
 
 		case ActionTypeManual:
 			// 用户手动更新
-			if update_type == UpdateTypeTalisman {
+			switch update_type {
+			case UpdateTypeTalisman:
 				gameUser.OnlineTalismanTotal = &currentCount
-			} else if update_type == UpdateTypeIngot {
+			case UpdateTypeIngot:
 				gameUser.OnlineIngotTotal = &currentCount
 			}
 			gameUser.LastOnlineQueryTime = &now
@@ -317,8 +359,12 @@ func diff_update_data(
 	}
 
 	// 在这里将进行批量更新和插入
-	update_data(installUsers, updatedUsers)
-	return updatedUsers
+	err := update_data(installUsers, updatedUsers)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func update_data(installUsers []sc.GameUser, updatedUsers []sc.GameUser) error {
@@ -336,14 +382,53 @@ func update_data(installUsers []sc.GameUser, updatedUsers []sc.GameUser) error {
 	}
 
 	// 批量更新现有用户
-	if len(updatedUsers) > 0 {
-		for _, user := range updatedUsers {
-			if err := db.Model(&sc.GameUser{}).
-				Where("id = ?", user.ID).
-				Updates(&user).Error; err != nil {
-				return fmt.Errorf("更新用户 %s 失败: %v", *user.RoleGameId, err)
-			}
-		}
+	// if len(updatedUsers) > 0 {
+	// 	for _, user := range updatedUsers {
+	// 		if err := db.Model(&sc.GameUser{}).
+	// 			Where("id = ?", user.ID).
+	// 			Updates(&user).Error; err != nil {
+	// 			return fmt.Errorf("更新用户 %s 失败: %v", *user.RoleGameId, err)
+	// 		}
+	// 	}
+	// }
+	err := update_user_info(updatedUsers)
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+// 批量更新用户表（单条 SQL，事务安全）
+// 批量更新用户表（极简、无事务、单条 SQL）
+func update_user_info(users []sc.GameUser) error {
+	if len(users) == 0 {
+		return nil
+	}
+
+	data := make([]map[string]interface{}, len(users))
+	for i, u := range users {
+		data[i] = map[string]interface{}{
+			"id":                       u.ID,
+			"last_ingot_trade_time":    u.LastIngotTradeTime,
+			"last_talisman_trade_time": u.LastTalismanTradeTime,
+			"online_talisman_total":    u.OnlineTalismanTotal,
+			"online_ingot_total":       u.OnlineIngotTotal,
+			"last_sync_query_time":     u.LastSyncQueryTime,
+			"last_sync_update_time":    u.LastSyncUpdateTime,
+			"talisman_diff":            u.TalismanDiff,
+			"ingot_diff":               u.IngotDiff,
+			"un_bound_ingot_quantity":  u.UnBoundIngotQuantity,
+			"bound_ingot_quantity":     u.BoundIngotQuantity,
+			"total_ingot_quantity":     u.TotalIngotQuantity,
+			"un_bound_talisman":        u.UnBoundTalisman,
+			"bound_talisman":           u.BoundTalisman,
+			"total_talisman":           u.TotalTalisman,
+		}
+	}
+	return global.GVA_DB.Clauses(
+		clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}}, // 主键/唯一键
+			UpdateAll: true,                          // 冲突时全部字段更新
+		},
+	).CreateInBatches(users, 100).Error
 }

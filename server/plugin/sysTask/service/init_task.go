@@ -12,5 +12,6 @@ func InitJob() {
 		// ...
 		"MyCustomTask":   MyCustomTask{}, // 添加您的任务
 		"ListServerTask": ListServerTask{},
+		"ItemUpdateLogs": ItemUpdateLogs{},
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -12,6 +13,29 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
+
+// ExcelStringToString 把字符串形式的 Excel 序列日期 转成年-月-日 时:分
+func ExcelStringToString(s string) string {
+	serial, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return s
+	}
+
+	// Excel的基准日期是1899-12-30
+	const baseDate = "1899-12-30"
+	baseTime, _ := time.Parse("2006-01-02", baseDate)
+
+	// 计算天数和当天的时间部分
+	days := int64(serial)
+	fraction := serial - float64(days)
+
+	// 计算完整时间
+	fullTime := baseTime.AddDate(0, 0, int(days))
+	secondsInDay := int64(fraction * 24 * 60 * 60)
+	resultTime := fullTime.Add(time.Duration(secondsInDay) * time.Second)
+
+	return resultTime.Format("2006-01-02 15:04")
+}
 
 type GameUserAuthCodeImportService struct{}
 
@@ -39,7 +63,7 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 	requiredColumns := []string{"登录码", "使用人"}
 	for _, col := range requiredColumns {
 		if _, exists := columnMap[col]; !exists {
-			return fmt.Errorf("Excel缺少必需列: %s", col)
+			return fmt.Errorf("excel缺少必需列: %s", col)
 		}
 	}
 
@@ -198,11 +222,13 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 
 			serverOpenTime := s.getCellValue(row, columnMap, "开服时间")
 			if serverOpenTime != "" {
+				serverOpenTime = ExcelStringToString(serverOpenTime)
 				authCode.ServerOpenTime = &serverOpenTime
 			}
 
 			enterServerTime := s.getCellValue(row, columnMap, "进服时间")
 			if enterServerTime != "" {
+				enterServerTime = ExcelStringToString(enterServerTime)
 				authCode.EnterServerTime = &enterServerTime
 			}
 

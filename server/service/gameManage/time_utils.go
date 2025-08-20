@@ -6,17 +6,15 @@ import (
 	"time"
 )
 
-// BuildTime 根据输入的分钟数生成符合要求的时间范围
-// minutes: 实际要查询的分钟数，必须是5的倍数
+// BuildTime 根据输入的倍数生成时间范围
+// minutes: 倍数，实际时间范围为 minutes * 5 分钟
 // 返回值: 格式化后的开始时间和结束时间字符串（格式：2025-08-04+20:00）
 func BuildTime(minutes int) (string, string) {
 	// 获取当前时间
 	now := time.Now()
 
-	// 确保分钟数是5的倍数
-	if minutes%5 != 0 {
-		minutes = (minutes/5 + 1) * 5
-	}
+	// 计算实际分钟数 = 输入倍数 * 5
+	actualMinutes := minutes * 5
 
 	// 计算结束时间: 向下取整到最近的5分钟倍数
 	minute := now.Minute()
@@ -27,8 +25,8 @@ func BuildTime(minutes int) (string, string) {
 		now.Location(),
 	)
 
-	// 计算开始时间: 结束时间减去指定的分钟数
-	duration := time.Duration(minutes) * time.Minute
+	// 计算开始时间: 结束时间减去实际分钟数
+	duration := time.Duration(actualMinutes) * time.Minute
 	startTime := endTime.Add(-duration)
 
 	// 确保开始时间不超过当前时间

@@ -123,6 +123,90 @@ func (gm *GameManager) baseRequestMSCS(urlStr string, method string, headers map
 	return strBody, nil
 }
 
+func (gm *GameManager) baseRequestMSCSAndHeader(urlStr string, method string, headers map[string]string, params map[string]string) (string, string, error) {
+	var result string = ""
+	var respContentType string = ""
+
+	// 根据请求方法决定数据格式和请求体数据
+	var format request.DataFormat
+	var data any = nil
+
+	if method == "POST" {
+		// 对于POST请求，根据Content-Type决定格式
+		if headers["Content-Type"] == "application/x-www-form-urlencoded; charset=UTF-8" {
+			format = request.FormFormat
+		} else {
+			format = request.JSONFormat
+		}
+		data = params
+	} else {
+		// 对于非POST请求（如GET），使用表单格式，且请求体数据为nil
+		format = request.FormFormat
+		data = nil
+
+	}
+
+	// 调用request包的HttpRequest方法发送请求
+	resp, err := request.HttpRequest(urlStr, method, headers, params, data, format)
+
+	if err != nil {
+		return "", respContentType, fmt.Errorf("请求发送失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// 处理响应内容（gzip解压和编码转换）
+	var reader io.Reader = resp.Body
+	contentEncoding := resp.Header.Get("Content-Encoding")
+	if strings.Contains(contentEncoding, "gzip") {
+		gzReader, err := gzip.NewReader(reader)
+		if err != nil {
+			return result, respContentType, fmt.Errorf("gzip解压失败: %w", err)
+		}
+		defer gzReader.Close()
+		reader = gzReader
+	}
+
+	// 处理application/octet-stream类型的响应，特别是GBK编码
+	contentType := resp.Header.Get("Content-Type")
+	respContentType = contentType
+	if strings.Contains(contentType, "application/octet-stream") {
+		// 读取原始字节
+		bodyBytes, err := io.ReadAll(reader)
+		if err != nil {
+			return result, respContentType, fmt.Errorf("读取响应体失败: %w", err)
+		}
+
+		// 检查是否包含GBK编码标识
+		if strings.Contains(contentType, "charset=gbk") {
+			// 尝试使用GBK编码解码
+			decoder := simplifiedchinese.GBK.NewDecoder()
+			decodedBytes, err := io.ReadAll(decoder.Reader(bytes.NewReader(bodyBytes)))
+			if err != nil {
+				// 如果解码失败，使用原始字节
+				result = string(bodyBytes)
+			} else {
+				result = string(decodedBytes)
+			}
+		} else {
+			// 假设是UTF-8编码
+			result = string(bodyBytes)
+		}
+
+		return result, respContentType, nil
+	}
+
+	// 对于其他类型的响应，保持当前reader不变
+
+	// 读取响应内容
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		return result, respContentType, fmt.Errorf("读取响应体失败: %w", err)
+	}
+
+	strBody := string(body)
+	return strBody, respContentType, nil
+}
+
 // baseHeader 构建基础请求头
 func (gm *GameManager) baseHeader() map[string]string {
 	return map[string]string{
@@ -341,7 +425,7 @@ func buildEncodedURL(baseURL string, params map[string]string) string {
 func (gm *GameManager) GetPlayerActions(starttime, endtime, item, serverId string) ([]PlayerAction, error) {
 	urlStr := "http://ht.sqdk.yuhetx.net/default/server"
 	RefererUrl := "http://ht.sqdk.yuhetx.net/player/action"
-
+	var actions []PlayerAction
 	method := "GET"
 
 	// 处理时间参数，如果为空则使用默认时间范围(最近10分钟)
@@ -386,14 +470,24 @@ func (gm *GameManager) GetPlayerActions(starttime, endtime, item, serverId strin
 	}
 
 	// 发送请求
-	res, err := gm.baseRequestMSCS(urlStr, method, header, params)
+	res, resContentType, err := gm.baseRequestMSCSAndHeader(urlStr, method, header, params)
 	if err != nil {
 		fmt.Printf("获取玩家行为数据失败: %v\n", err)
 		return nil, err
 	}
 
+	if res == "" {
+		return actions, nil
+	}
+
+	if resContentType == "" || !strings.Contains(resContentType, "application/octet-stream") {
+		fmt.Printf("获取玩家行为数据失败: %v\n", resContentType)
+		err = fmt.Errorf("获取玩家行为数据失败: %v", resContentType)
+		return nil, err
+	}
+
 	// 解析CSV数据
-	actions, err := parsePlayerActionCSV(res)
+	actions, err = parsePlayerActionCSV(res)
 	if err != nil {
 		fmt.Printf("解析CSV数据失败: %v\n", err)
 		return nil, err
