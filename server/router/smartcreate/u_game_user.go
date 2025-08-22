@@ -13,14 +13,17 @@ func (s *GameUserRouter) InitGameUserRouter(Router *gin.RouterGroup, PublicRoute
 	game_userRouterWithoutAuth := PublicRouter.Group("game_user")
 	{
 		game_userRouter.POST("createGameUser", game_userApi.CreateGameUser)
+
 		game_userRouter.DELETE("deleteGameUser", game_userApi.DeleteGameUser)
 		game_userRouter.DELETE("deleteGameUserByIds", game_userApi.DeleteGameUserByIds)
 		game_userRouter.PUT("updateGameUser", game_userApi.UpdateGameUser)
 		game_userRouter.POST("submit_gold_coin_info", game_userApi.SubmitGoldCoinInfo)
+		game_userRouter.PUT("updateItemByServerID", game_userApi.UpdateItemByServerID)
 	}
 	{
 		game_userRouterWithoutRecord.GET("findGameUser", game_userApi.FindGameUser)
 		game_userRouterWithoutRecord.GET("getGameUserList", game_userApi.GetGameUserList)
+
 	}
 	{
 		game_userRouterWithoutAuth.GET("getGameUserDataSource", game_userApi.GetGameUserDataSource)

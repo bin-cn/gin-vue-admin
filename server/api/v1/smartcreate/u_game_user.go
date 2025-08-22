@@ -12,6 +12,25 @@ import (
 
 type GameUserApi struct{}
 
+func (game_userApi *GameUserApi) UpdateItemByServerID(c *gin.Context) {
+
+	var req struct {
+		ServerID string `json:"serverID"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+	ServerID := req.ServerID
+	userID := utils.GetUserID(c)
+	err := game_userService.UpdateItemByServerID(c, userID, ServerID)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	response.OkWithMessage("已更新成功", c)
+}
+
 // CreateGameUser 创建用户信息表
 // @Tags GameUser
 // @Summary 创建用户信息表
@@ -22,6 +41,7 @@ type GameUserApi struct{}
 // @Success 200 {object} response.Response{msg=string} "创建成功"
 // @Router /game_user/createGameUser [post]
 func (game_userApi *GameUserApi) CreateGameUser(c *gin.Context) {
+
 	// 创建业务用Context
 	ctx := c.Request.Context()
 
@@ -159,18 +179,26 @@ func (game_userApi *GameUserApi) GetGameUserList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := game_userService.GetGameUserInfoList(ctx, pageInfo)
+
+	// 获取当前登录用户ID
+	userId := utils.GetUserID(c)
+	// 获取当前登录用户角色ID
+	authorityId := utils.GetUserAuthorityId(c)
+
+	list, total, totalItem, err := game_userService.GetGameUserInfoList(ctx, pageInfo, userId, authorityId)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败:"+err.Error(), c)
 		return
 	}
-	response.OkWithDetailed(response.PageResult{
-		List:     list,
-		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
+	response.OkWithDetailed(map[string]interface{}{
+		"list":      list,
+		"total":     total,
+		"page":      pageInfo.Page,
+		"pageSize":  pageInfo.PageSize,
+		"totalItem": totalItem,
 	}, "获取成功", c)
+
 }
 
 // GetGameUserDataSource 获取GameUser的数据源

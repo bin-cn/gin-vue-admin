@@ -7,11 +7,36 @@ import (
 )
 
 // BuildTime 根据输入的倍数生成时间范围
-// minutes: 倍数，实际时间范围为 minutes * 5 分钟
+// minutes: 倍数，实际时间范围为 minutes * 5 分钟,-1表示昨天数据
 // 返回值: 格式化后的开始时间和结束时间字符串（格式：2025-08-04+20:00）
 func BuildTime(minutes int) (string, string) {
 	// 获取当前时间
 	now := time.Now()
+
+	// 处理-1的特殊情况：返回昨天01:00到23:59
+	if minutes == -1 {
+		yesterday := now.AddDate(0, 0, -1)
+		startTime := time.Date(
+			yesterday.Year(), yesterday.Month(), yesterday.Day(),
+			1, 0, 0, 0, now.Location(),
+		)
+		endTime := time.Date(
+			yesterday.Year(), yesterday.Month(), yesterday.Day(),
+			23, 55, 0, 0, now.Location(),
+		)
+
+		startStr := fmt.Sprintf(
+			"%04d-%02d-%02d %02d:%02d",
+			startTime.Year(), startTime.Month(), startTime.Day(),
+			startTime.Hour(), startTime.Minute(),
+		)
+		endStr := fmt.Sprintf(
+			"%04d-%02d-%02d %02d:%02d",
+			endTime.Year(), endTime.Month(), endTime.Day(),
+			endTime.Hour(), endTime.Minute(),
+		)
+		return startStr, endStr
+	}
 
 	// 计算实际分钟数 = 输入倍数 * 5
 	actualMinutes := minutes * 5

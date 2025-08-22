@@ -8,6 +8,7 @@ type ApiGroup struct {
 	GameUserAuthCodeImportApi
 	GameServerApi
 	CookieDataApi
+	DailyRevenueRecordApi
 }
 
 var (
@@ -16,4 +17,5 @@ var (
 	game_user_auth_codeImportService = service.ServiceGroupApp.SmartcreateServiceGroup.GameUserAuthCodeImportService
 	gamesrvService                   = service.ServiceGroupApp.SmartcreateServiceGroup.GameServerService
 	wcService                        = service.ServiceGroupApp.SmartcreateServiceGroup.CookieDataService
+	drService                        = service.ServiceGroupApp.SmartcreateServiceGroup.DailyRevenueRecordService
 )

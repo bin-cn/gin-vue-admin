@@ -23,8 +23,6 @@ type GameUserSearch struct {
 	UserId         *int        `json:"userId" form:"userId"`
 	// 在结构体中新增如下字段
 	GameServerName            *string `json:"gameServerName" form:"gameServerName"`
-	StartGameServerId         *int    `json:"startGameServerId" form:"startGameServerId"`
-	EndGameServerId           *int    `json:"endGameServerId" form:"endGameServerId"`
 	StartUnBoundIngotQuantity *int    `json:"startUnBoundIngotQuantity" form:"startUnBoundIngotQuantity"`
 	EndUnBoundIngotQuantity   *int    `json:"endUnBoundIngotQuantity" form:"endUnBoundIngotQuantity"`
 	StartBoundIngotQuantity   *int    `json:"startBoundIngotQuantity" form:"startBoundIngotQuantity"`
@@ -55,6 +53,8 @@ type GameUserSearch struct {
 	LastTalismanTradeTimeRange []time.Time `json:"lastTalismanTradeTimeRange" form:"lastTalismanTradeTimeRange[]"`
 	OnlineTalismanTotal        *int        `json:"onlineTalismanTotal" form:"onlineTalismanTotal"`
 	OnlineIngotTotal           *int        `json:"onlineIngotTotal" form:"onlineIngotTotal"`
+	GameServerId               *string     `json:"gameServerId" form:"gameServerId"`
+
 	request.PageInfo
 	Sort  string `json:"sort" form:"sort"`
 	Order string `json:"order" form:"order"`

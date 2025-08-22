@@ -8,10 +8,33 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate"
 	smartcreateReq "github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate/response"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type GameUserService struct{}
+
+func (game_userService GameUserService) UpdateItemByServerID(c *gin.Context, userID uint, server_zone_id string) error {
+	gm, err := VerifyItemUpdateLogsData("3")
+	if err != nil {
+		return fmt.Errorf("物品更新日志任务验证数据失败: %v", err)
+	}
+
+	var mainServerId int
+	global.GVA_DB.Raw("SELECT DISTINCT main_server_id FROM gva.game_server WHERE server_zone_id = ? LIMIT 1", server_zone_id).Scan(&mainServerId)
+
+	if mainServerId == 0 {
+		return fmt.Errorf("没有找到对应的主服务器ID")
+	}
+
+	err = Update_player_info_by_serverid_lock(gm, ActionTypeManual, fmt.Sprintf("%d", mainServerId), 10)
+
+	if err != nil {
+		return fmt.Errorf("物品更新日志任务验证数据失败: %v", err)
+	}
+	return nil
+}
 
 // CreateGameUser 创建用户信息表记录
 // Author [yourname](https://github.com/yourname)
@@ -66,12 +89,18 @@ func (game_userService *GameUserService) GetGameUser(ctx context.Context, ID str
 
 // GetGameUserInfoList 分页获取用户信息表记录
 // Author [yourname](https://github.com/yourname)
-func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context, info smartcreateReq.GameUserSearch) (list []smartcreate.GameUser, total int64, err error) {
+func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context, info smartcreateReq.GameUserSearch, currentUserId uint, authorityId uint) (list []smartcreate.GameUser, total int64, stats response.GameUserStatsResp, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
 	db := global.GVA_DB.Model(&smartcreate.GameUser{})
 	var game_users []smartcreate.GameUser
+
+	// 如果角色ID为4，只显示当前用户的数据
+	if authorityId == 4 {
+		db = db.Where("user_id = ?", currentUserId)
+	}
+
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if len(info.CreatedAtRange) == 2 {
 		db = db.Where("created_at BETWEEN ? AND ?", info.CreatedAtRange[0], info.CreatedAtRange[1])
@@ -110,8 +139,8 @@ func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context
 	if info.GameServerName != nil && *info.GameServerName != "" {
 		db = db.Where("game_server_name LIKE ?", "%"+*info.GameServerName+"%")
 	}
-	if info.StartGameServerId != nil && info.EndGameServerId != nil {
-		db = db.Where("game_server_id BETWEEN ? AND ? ", *info.StartGameServerId, *info.EndGameServerId)
+	if info.GameServerId != nil && *info.GameServerId != "" {
+		db = db.Where("game_server_id = ? ", *info.GameServerId)
 	}
 
 	if info.RoleOnlineStatus != nil && *info.RoleOnlineStatus != "" {
@@ -159,6 +188,13 @@ func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context
 	if info.OnlineIngotTotal != nil {
 		db = db.Where("online_ingot_total > ?", *info.OnlineIngotTotal)
 	}
+	//  这里增加一个 统计  online_ingot_total  和  un_bound_ingot_quantity  两个数据要进行返回,我需要把这个数据返回到前端,需要用对象包裹这两个属性,方便后续扩展.
+
+	statDB := db.Session(&gorm.Session{}) // 创建一个新的会话副本
+	statDB.
+		Model(&smartcreate.GameUser{}).
+		Select("COALESCE(SUM(online_ingot_total),0) as online_ingot_total, COALESCE(SUM(un_bound_ingot_quantity),0) as un_bound_ingot_quantity").
+		Scan(&stats)
 
 	err = db.Count(&total).Error
 	if err != nil {
@@ -206,7 +242,8 @@ func (game_userService *GameUserService) GetGameUserInfoList(ctx context.Context
 	}
 
 	err = db.Find(&game_users).Error
-	return game_users, total, err
+	return game_users, total, stats, err
+
 }
 func (game_userService *GameUserService) GetGameUserDataSource(ctx context.Context) (res map[string][]map[string]any, err error) {
 	res = make(map[string][]map[string]any)

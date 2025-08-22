@@ -45,6 +45,8 @@
   "/src/view/login/index.vue": "Login",
   "/src/view/person/person.vue": "Person",
   "/src/view/routerHolder.vue": "RouterHolder",
+  "/src/view/smartcreate/dailyrevenuerecord/dailyrevenuerecord.vue": "DailyRevenueRecord",
+  "/src/view/smartcreate/dailyrevenuerecord/dailyrevenuerecordForm.vue": "DailyRevenueRecordForm",
   "/src/view/smartcreate/gameServer/gameServer.vue": "GameServer",
   "/src/view/smartcreate/gameServer/gameServerForm.vue": "GameServerForm",
   "/src/view/smartcreate/uGameUser/uGameUser.vue": "GameUser",

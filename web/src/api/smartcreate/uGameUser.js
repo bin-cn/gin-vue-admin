@@ -5,7 +5,18 @@ import service from '@/utils/request'
 // @Accept application/json
 // @Produce application/json
 // @Param data body model.GameUser true "创建用户信息表"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
+// @Success 200 {string}
+
+// 根据服务器ID更新物品
+export function updateItemByServerID(data) {
+  return service({
+    url: '/game_user/updateItemByServerID',
+    method: 'put',
+    data
+  })
+}
+
+
 // @Router /game_user/createGameUser [post]
 export const createGameUser = (data) => {
   return service({

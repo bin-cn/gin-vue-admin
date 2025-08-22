@@ -23,26 +23,6 @@
           />
        </el-form-item>
       
-            <el-form-item label="主区服服务器ID" prop="mainServerId">
-  <el-input v-model="searchInfo.mainServerId" placeholder="搜索条件" />
-</el-form-item>
-            
-            <el-form-item label="主区服ID" prop="mainServerZoneId">
-  <el-input v-model="searchInfo.mainServerZoneId" placeholder="搜索条件" />
-</el-form-item>
-            
-            <el-form-item label="服务器ID" prop="serverId">
-  <el-input v-model="searchInfo.serverId" placeholder="搜索条件" />
-</el-form-item>
-            
-            <el-form-item label="区服ID" prop="serverZoneId">
-  <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
-</el-form-item>
-            
-            <el-form-item label="区服名字" prop="serverName">
-  <el-input v-model="searchInfo.serverName" placeholder="搜索条件" />
-</el-form-item>
-            
 
         <template v-if="showAllQuery">
           <!-- 将需要控制显示状态的查询条件添加到此范围内 -->
@@ -60,7 +40,9 @@
         <div class="gva-btn-list">
             <el-button  type="primary" icon="plus" @click="openDialog()">新增</el-button>
             <el-button  icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">删除</el-button>
-            
+            <ExportTemplate  template-id="smartcreate_DailyRevenueRecord" />
+            <ExportExcel  template-id="smartcreate_DailyRevenueRecord" filterDeleted/>
+            <ImportExcel  template-id="smartcreate_DailyRevenueRecord" @on-success="getTableData" />
         </div>
         <el-table
         ref="multipleTable"
@@ -77,20 +59,29 @@
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         
-            <el-table-column sortable align="left" label="主区服服务器ID" prop="mainServerId" width="120" />
+            <el-table-column sortable align="left" label="统计日期" prop="statisticDate" width="120" />
 
-            <el-table-column sortable align="left" label="主区服ID" prop="mainServerZoneId" width="120" />
+            <el-table-column sortable align="left" label="用户ID" prop="userId" width="120" />
 
-            <el-table-column sortable align="left" label="服务器ID" prop="serverId" width="120" />
-
-            <el-table-column sortable align="left" label="区服ID" prop="serverZoneId" width="120" />
+            <el-table-column sortable align="left" label="用户昵称" prop="userNickname" width="120" />
 
             <el-table-column sortable align="left" label="区服名字" prop="serverName" width="120" />
 
-        <el-table-column align="left" label="操作" fixed="right" :min-width="appStore.operateMinWith" v-if="false">
+            <el-table-column sortable align="left" label="区服ID" prop="serverZoneId" width="120" />
+
+            <el-table-column sortable align="left" label="主区服ID" prop="mainServerZoneId" width="120" />
+
+            <el-table-column sortable align="left" label="统计类型" prop="statisticType" width="120">
+    <template #default="scope">
+    {{ filterDict(scope.row.statisticType,MaterialTypeOptions) }}
+    </template>
+</el-table-column>
+            <el-table-column sortable align="left" label="产出金额" prop="amount" width="120" />
+
+        <el-table-column align="left" label="操作" fixed="right" :min-width="appStore.operateMinWith">
             <template #default="scope">
             <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看</el-button>
-            <el-button  type="primary" link icon="edit" class="table-button" @click="updateGameServerFunc(scope.row)">编辑</el-button>
+            <el-button  type="primary" link icon="edit" class="table-button" @click="updateDailyRevenueRecordFunc(scope.row)">编辑</el-button>
             <el-button   type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>
@@ -119,40 +110,60 @@
             </template>
 
           <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="主区服服务器ID:" prop="mainServerId">
-    <el-input v-model="formData.mainServerId" :clearable="true" placeholder="请输入主区服服务器ID" />
+            <el-form-item label="统计日期:" prop="statisticDate">
+    <el-input v-model="formData.statisticDate" :clearable="false" placeholder="请输入统计日期" />
 </el-form-item>
-            <el-form-item label="主区服ID:" prop="mainServerZoneId">
-    <el-input v-model="formData.mainServerZoneId" :clearable="true" placeholder="请输入主区服ID" />
+            <el-form-item label="用户ID:" prop="userId">
+    <el-input v-model="formData.userId" :clearable="false" placeholder="请输入用户ID" />
 </el-form-item>
-            <el-form-item label="服务器ID:" prop="serverId">
-    <el-input v-model="formData.serverId" :clearable="true" placeholder="请输入服务器ID" />
-</el-form-item>
-            <el-form-item label="区服ID:" prop="serverZoneId">
-    <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入区服ID" />
+            <el-form-item label="用户昵称:" prop="userNickname">
+    <el-input v-model="formData.userNickname" :clearable="false" placeholder="请输入用户昵称" />
 </el-form-item>
             <el-form-item label="区服名字:" prop="serverName">
-    <el-input v-model="formData.serverName" :clearable="true" placeholder="请输入区服名字" />
+    <el-input v-model="formData.serverName" :clearable="false" placeholder="请输入区服名字" />
+</el-form-item>
+            <el-form-item label="区服ID:" prop="serverZoneId">
+    <el-input v-model="formData.serverZoneId" :clearable="false" placeholder="请输入区服ID" />
+</el-form-item>
+            <el-form-item label="主区服ID:" prop="mainServerZoneId">
+    <el-input v-model="formData.mainServerZoneId" :clearable="false" placeholder="请输入主区服ID" />
+</el-form-item>
+            <el-form-item label="统计类型:" prop="statisticType">
+    <el-select v-model="formData.statisticType" placeholder="请选择统计类型" style="width:100%" filterable :clearable="false">
+        <el-option v-for="(item,key) in MaterialTypeOptions" :key="key" :label="item.label" :value="item.value" />
+    </el-select>
+</el-form-item>
+            <el-form-item label="产出金额:" prop="amount">
+    <el-input-number v-model="formData.amount" style="width:100%" :precision="2" :clearable="false" />
 </el-form-item>
           </el-form>
     </el-drawer>
 
     <el-drawer destroy-on-close :size="appStore.drawerSize" v-model="detailShow" :show-close="true" :before-close="closeDetailShow" title="查看">
             <el-descriptions :column="1" border>
-                    <el-descriptions-item label="主区服服务器ID">
-    {{ detailForm.mainServerId }}
+                    <el-descriptions-item label="统计日期">
+    {{ detailForm.statisticDate }}
 </el-descriptions-item>
-                    <el-descriptions-item label="主区服ID">
-    {{ detailForm.mainServerZoneId }}
+                    <el-descriptions-item label="用户ID">
+    {{ detailForm.userId }}
 </el-descriptions-item>
-                    <el-descriptions-item label="服务器ID">
-    {{ detailForm.serverId }}
+                    <el-descriptions-item label="用户昵称">
+    {{ detailForm.userNickname }}
+</el-descriptions-item>
+                    <el-descriptions-item label="区服名字">
+    {{ detailForm.serverName }}
 </el-descriptions-item>
                     <el-descriptions-item label="区服ID">
     {{ detailForm.serverZoneId }}
 </el-descriptions-item>
-                    <el-descriptions-item label="区服名字">
-    {{ detailForm.serverName }}
+                    <el-descriptions-item label="主区服ID">
+    {{ detailForm.mainServerZoneId }}
+</el-descriptions-item>
+                    <el-descriptions-item label="统计类型">
+    {{ detailForm.statisticType }}
+</el-descriptions-item>
+                    <el-descriptions-item label="产出金额">
+    {{ detailForm.amount }}
 </el-descriptions-item>
             </el-descriptions>
         </el-drawer>
@@ -162,13 +173,13 @@
 
 <script setup>
 import {
-  createGameServer,
-  deleteGameServer,
-  deleteGameServerByIds,
-  updateGameServer,
-  findGameServer,
-  getGameServerList
-} from '@/api/smartcreate/gameServer'
+  createDailyRevenueRecord,
+  deleteDailyRevenueRecord,
+  deleteDailyRevenueRecordByIds,
+  updateDailyRevenueRecord,
+  findDailyRevenueRecord,
+  getDailyRevenueRecordList
+} from '@/api/smartcreate/dailyrevenuerecord'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
@@ -176,11 +187,16 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 import { useAppStore } from "@/pinia"
 
-
+// 导出组件
+import ExportExcel from '@/components/exportExcel/exportExcel.vue'
+// 导入组件
+import ImportExcel from '@/components/exportExcel/importExcel.vue'
+// 导出模板组件
+import ExportTemplate from '@/components/exportExcel/exportTemplate.vue'
 
 
 defineOptions({
-    name: 'GameServer'
+    name: 'DailyRevenueRecord'
 })
 
 // 提交按钮loading
@@ -191,18 +207,105 @@ const appStore = useAppStore()
 const showAllQuery = ref(false)
 
 // 自动化生成的字典（可能为空）以及字段
+const MaterialTypeOptions = ref([])
 const formData = ref({
-            mainServerId: '',
-            mainServerZoneId: '',
-            serverId: '',
-            serverZoneId: '',
+            statisticDate: '',
+            userId: '',
+            userNickname: '',
             serverName: '',
+            serverZoneId: '',
+            mainServerZoneId: '',
+            statisticType: '',
+            amount: 0,
         })
 
 
 
 // 验证规则
 const rule = reactive({
+               statisticDate : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               userId : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               userNickname : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               serverName : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               serverZoneId : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               mainServerZoneId : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               statisticType : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+               {
+                   whitespace: true,
+                   message: '不能只输入空格',
+                   trigger: ['input', 'blur'],
+              }
+              ],
+               amount : [{
+                   required: true,
+                   message: '',
+                   trigger: ['input','blur'],
+               },
+              ],
 })
 
 const elFormRef = ref()
@@ -219,11 +322,14 @@ const sortChange = ({ prop, order }) => {
   const sortMap = {
     CreatedAt:"CreatedAt",
     ID:"ID",
-            mainServerId: 'mainServerId',
-            mainServerZoneId: 'main_server_zone_id',
-            serverId: 'server_id',
-            serverZoneId: 'server_zone_id',
+            statisticDate: 'statistic_date',
+            userId: 'user_id',
+            userNickname: 'user_nickname',
             serverName: 'server_name',
+            serverZoneId: 'server_zone_id',
+            mainServerZoneId: 'main_server_zone_id',
+            statisticType: 'statistic_type',
+            amount: 'amount',
   }
 
   let sort = sortMap[prop]
@@ -264,7 +370,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getGameServerList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getDailyRevenueRecordList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -279,6 +385,7 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
+    MaterialTypeOptions.value = await getDictFunc('MaterialType')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -299,7 +406,7 @@ const deleteRow = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(() => {
-            deleteGameServerFunc(row)
+            deleteDailyRevenueRecordFunc(row)
         })
     }
 
@@ -322,7 +429,7 @@ const onDelete = async() => {
         multipleSelection.value.map(item => {
           IDs.push(item.ID)
         })
-      const res = await deleteGameServerByIds({ IDs })
+      const res = await deleteDailyRevenueRecordByIds({ IDs })
       if (res.code === 0) {
         ElMessage({
           type: 'success',
@@ -340,8 +447,8 @@ const onDelete = async() => {
 const type = ref('')
 
 // 更新行
-const updateGameServerFunc = async(row) => {
-    const res = await findGameServer({ ID: row.ID })
+const updateDailyRevenueRecordFunc = async(row) => {
+    const res = await findDailyRevenueRecord({ ID: row.ID })
     type.value = 'update'
     if (res.code === 0) {
         formData.value = res.data
@@ -351,8 +458,8 @@ const updateGameServerFunc = async(row) => {
 
 
 // 删除行
-const deleteGameServerFunc = async (row) => {
-    const res = await deleteGameServer({ ID: row.ID })
+const deleteDailyRevenueRecordFunc = async (row) => {
+    const res = await deleteDailyRevenueRecord({ ID: row.ID })
     if (res.code === 0) {
         ElMessage({
                 type: 'success',
@@ -378,11 +485,14 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        mainServerId: '',
-        mainServerZoneId: '',
-        serverId: '',
-        serverZoneId: '',
+        statisticDate: '',
+        userId: '',
+        userNickname: '',
         serverName: '',
+        serverZoneId: '',
+        mainServerZoneId: '',
+        statisticType: '',
+        amount: 0,
         }
 }
 // 弹窗确定
@@ -393,13 +503,13 @@ const enterDialog = async () => {
               let res
               switch (type.value) {
                 case 'create':
-                  res = await createGameServer(formData.value)
+                  res = await createDailyRevenueRecord(formData.value)
                   break
                 case 'update':
-                  res = await updateGameServer(formData.value)
+                  res = await updateDailyRevenueRecord(formData.value)
                   break
                 default:
-                  res = await createGameServer(formData.value)
+                  res = await createDailyRevenueRecord(formData.value)
                   break
               }
               btnLoading.value = false
@@ -429,7 +539,7 @@ const openDetailShow = () => {
 // 打开详情
 const getDetails = async (row) => {
   // 打开弹窗
-  const res = await findGameServer({ ID: row.ID })
+  const res = await findDailyRevenueRecord({ ID: row.ID })
   if (res.code === 0) {
     detailForm.value = res.data
     openDetailShow()

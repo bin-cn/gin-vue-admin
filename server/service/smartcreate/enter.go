@@ -6,4 +6,5 @@ type ServiceGroup struct {
 	GameUserAuthCodeImportService
 	GameServerService
 	CookieDataService
+	DailyRevenueRecordService
 }

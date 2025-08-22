@@ -25,51 +25,17 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="登录码" prop="loginCode">
-          <el-input v-model="searchInfo.loginCode" placeholder="搜索条件" />
-        </el-form-item>
-
-        <el-form-item label="用户ID" prop="userId">
+     
+        <el-form-item label="用户ID" prop="userId" v-if="false">
           <el-select v-model="searchInfo.userId" filterable placeholder="请选择用户ID" :clearable="true">
             <el-option v-for="(item, key) in dataSource.userId" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="未绑定元宝数量" prop="unBoundIngotQuantity">
-          <el-input class="w-40" v-model.number="searchInfo.startUnBoundIngotQuantity" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endUnBoundIngotQuantity" placeholder="最大值" />
+        <el-form-item label="区服ID" prop="gameServerId">
+          <el-input v-model="searchInfo.gameServerId" placeholder="搜索条件" />
         </el-form-item>
 
-        <el-form-item label="绑定元宝数量" prop="boundIngotQuantity">
-          <el-input class="w-40" v-model.number="searchInfo.startBoundIngotQuantity" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endBoundIngotQuantity" placeholder="最大值" />
-        </el-form-item>
-
-        <el-form-item label="元宝总数" prop="totalIngotQuantity">
-          <el-input class="w-40" v-model.number="searchInfo.startTotalIngotQuantity" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endTotalIngotQuantity" placeholder="最大值" />
-        </el-form-item>
-
-        <el-form-item label="未绑定灵符" prop="unBoundTalisman">
-          <el-input class="w-40" v-model.number="searchInfo.startUnBoundTalisman" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endUnBoundTalisman" placeholder="最大值" />
-        </el-form-item>
-
-        <el-form-item label="绑定灵符" prop="boundTalisman">
-          <el-input class="w-40" v-model.number="searchInfo.startBoundTalisman" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endBoundTalisman" placeholder="最大值" />
-        </el-form-item>
-
-        <el-form-item label="灵符总数" prop="totalTalisman">
-          <el-input class="w-40" v-model.number="searchInfo.startTotalTalisman" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endTotalTalisman" placeholder="最大值" />
-        </el-form-item>
 
         <el-form-item label="区服名称" prop="gameServerName">
           <el-input v-model="searchInfo.gameServerName" placeholder="搜索条件" />
@@ -106,71 +72,8 @@
         </el-form-item>
 
 
-        <el-form-item label="元宝变动差异" prop="ingotDiff">
-          <el-input class="w-40" v-model.number="searchInfo.startIngotDiff" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endIngotDiff" placeholder="最大值" />
-        </el-form-item>
 
 
-        <el-form-item label="最后一次同步查询时间" prop="lastSyncQueryTime">
-          <template #label>
-            <span>
-              最后一次同步查询时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncQueryTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
-
-
-        <el-form-item label="最后一次同步更新时间" prop="lastSyncUpdateTime">
-          <template #label>
-            <span>
-              最后一次同步更新时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncUpdateTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
-
-
-        <el-form-item label="脚本最后在线时间" prop="scriptLastOnlineTime">
-          <template #label>
-            <span>
-              脚本最后在线时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.scriptLastOnlineTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
-
-
-        <el-form-item label="角色最后在线时间" prop="roleLastOnlineTime">
-          <template #label>
-            <span>
-              角色最后在线时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.roleLastOnlineTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
 
 
         <el-form-item label="游戏角色ID" prop="roleGameId">
@@ -178,39 +81,12 @@
         </el-form-item>
 
 
-        <el-form-item label="原始区服ID" prop="serverZoneId">
-          <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
+           <el-form-item label="登录码" prop="loginCode">
+          <el-input v-model="searchInfo.loginCode" placeholder="搜索条件" />
         </el-form-item>
 
 
-        <el-form-item label="最后一次交易元宝变动时间" prop="lastIngotTradeTime">
-          <template #label>
-            <span>
-              最后一次交易元宝变动时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.lastIngotTradeTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
 
-
-        <el-form-item label="最后一次交易灵符时间" prop="lastTalismanTradeTime">
-          <template #label>
-            <span>
-              最后一次交易灵符时间
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker class="w-[380px]" v-model="searchInfo.lastTalismanTradeTimeRange" type="datetimerange"
-            range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
 
 
         <el-form-item label="线上灵符总数" prop="onlineTalismanTotal">
@@ -222,15 +98,148 @@
           <el-input v-model.number="searchInfo.onlineIngotTotal" placeholder="搜索条件" />
         </el-form-item>
 
-        <el-form-item label="区服ID" prop="gameServerId">
-          <el-input class="w-40" v-model.number="searchInfo.startGameServerId" placeholder="最小值" />
-          —
-          <el-input class="w-40" v-model.number="searchInfo.endGameServerId" placeholder="最大值" />
-        </el-form-item>
+
 
 
         <template v-if="showAllQuery">
           <!-- 将需要控制显示状态的查询条件添加到此范围内 -->
+          <el-form-item label="主区服ID" prop="serverZoneId">
+          <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
+        </el-form-item>
+ 
+
+          <el-form-item label="绑定元宝数量" prop="boundIngotQuantity">
+            <el-input class="w-40" v-model.number="searchInfo.startBoundIngotQuantity" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endBoundIngotQuantity" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="元宝总数" prop="totalIngotQuantity">
+            <el-input class="w-40" v-model.number="searchInfo.startTotalIngotQuantity" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endTotalIngotQuantity" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="未绑定元宝数量" prop="unBoundIngotQuantity">
+            <el-input class="w-40" v-model.number="searchInfo.startUnBoundIngotQuantity" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endUnBoundIngotQuantity" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="未绑定灵符" prop="unBoundTalisman">
+            <el-input class="w-40" v-model.number="searchInfo.startUnBoundTalisman" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endUnBoundTalisman" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="绑定灵符" prop="boundTalisman">
+            <el-input class="w-40" v-model.number="searchInfo.startBoundTalisman" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endBoundTalisman" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="灵符总数" prop="totalTalisman">
+            <el-input class="w-40" v-model.number="searchInfo.startTotalTalisman" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endTotalTalisman" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="元宝变动差异" prop="ingotDiff">
+            <el-input class="w-40" v-model.number="searchInfo.startIngotDiff" placeholder="最小值" />
+            —
+            <el-input class="w-40" v-model.number="searchInfo.endIngotDiff" placeholder="最大值" />
+          </el-form-item>
+
+          <el-form-item label="最后一次交易元宝变动时间" prop="lastIngotTradeTime">
+            <template #label>
+              <span>
+                最后一次交易元宝变动时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.lastIngotTradeTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
+          <el-form-item label="最后一次交易灵符时间" prop="lastTalismanTradeTime">
+            <template #label>
+              <span>
+                最后一次交易灵符时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.lastTalismanTradeTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
+          <el-form-item label="最后一次同步查询时间" prop="lastSyncQueryTime">
+            <template #label>
+              <span>
+                最后一次同步查询时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncQueryTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
+          <el-form-item label="最后一次同步更新时间" prop="lastSyncUpdateTime">
+            <template #label>
+              <span>
+                最后一次同步更新时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.lastSyncUpdateTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
+          <el-form-item label="脚本最后在线时间" prop="scriptLastOnlineTime">
+            <template #label>
+              <span>
+                脚本最后在线时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.scriptLastOnlineTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
+          <el-form-item label="角色最后在线时间" prop="roleLastOnlineTime">
+            <template #label>
+              <span>
+                角色最后在线时间
+                <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker class="w-[380px]" v-model="searchInfo.roleLastOnlineTimeRange" type="datetimerange"
+              range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker></el-form-item>
+
+
         </template>
 
         <el-form-item>
@@ -241,21 +250,67 @@
           <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>收起</el-button>
         </el-form-item>
       </el-form>
+      <!-- 我想在这里显示 在线元宝总数 未绑定元宝数量 -->
+      <!-- 放在表格上方或分页条下方均可 -->
+      <!-- 外层保持 flex 居中 -->
+      <!-- 外层只做居中 -->
+      <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+
+      
+
+        <div style="display: flex; gap: 12px; align-items: center; margin-right: 20px;">
+
+          <el-input v-model="serverID" placeholder="请输入服务器ID" clearable></el-input>
+          <el-button size="mini" type="primary" @click="handleUpdateItemByServerID">
+            更新物品
+          </el-button>
+
+          <el-button size="mini" type="primary" @click="copyColumn('onlineIngotTotal')">
+            复制线上元宝总数
+          </el-button>
+          <el-button size="mini" type="primary" @click="copyColumn('unBoundIngotQuantity')">
+            复制未绑定元宝数量
+          </el-button>
+        </div>
+
+        <!-- 第一组 -->
+        <div style="width: 220px; text-align: center;">
+          <div style="font-size: 14px; color: #666;">在线元宝总数</div>
+          <div style="font-size: 24px; color: #409EFF;">
+            <el-tooltip effect="dark" :content="toChineseNum(totalItem.onlineIngotTotal)" placement="top">
+
+              {{ totalItem.onlineIngotTotal }}
+            </el-tooltip>
+          </div>
+        </div>
+
+        <!-- 间距 -->
+        <div style="width: 40px;"></div>
+        <!-- 第二组 -->
+        <div style="width: 220px; text-align: center;">
+          <div style="font-size: 14px; color: #666;">未绑定元宝数量</div>
+          <div style="font-size: 24px; color: #67C23A;">
+            <el-tooltip effect="dark" :content="toChineseNum(totalItem.unBoundIngotQuantity)" placement="top">
+              {{ totalItem.unBoundIngotQuantity }}
+            </el-tooltip>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="gva-table-box">
-      <div class="gva-btn-list">
-        <el-button type="primary" icon="plus" @click="openDialog()">新增</el-button>
-        <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
-          @click="onDelete">删除</el-button>
-        <ExportTemplate template-id="smartcreate_GameUser" />
+      <div class="gva-btn-list"  v-if="false">
+        <el-button type="primary" icon="plus" @click="openDialog()" v-if="false">新增</el-button>
+        <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete"
+          v-if="false">删除</el-button>
+        <ExportTemplate template-id="smartcreate_GameUser" v-if="false" />
         <ExportExcel template-id="smartcreate_GameUser" filterDeleted />
-        <ImportExcel template-id="smartcreate_GameUser" @on-success="getTableData" />
+        <ImportExcel template-id="smartcreate_GameUser" @on-success="getTableData" v-if="false" />
       </div>
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange" @sort-change="sortChange">
+        height="600" @selection-change="handleSelectionChange" @sort-change="sortChange">
         <el-table-column type="selection" width="55" />
 
-        <el-table-column sortable align="left" label="日期" prop="CreatedAt" width="180">
+        <el-table-column sortable align="left" label="日期" prop="CreatedAt" width="180" v-if="false">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
 
@@ -270,14 +325,13 @@
           </template>
         </el-table-column>
 
-
         <el-table-column align="left" label="登录码" prop="loginCode" width="120" />
 
         <el-table-column align="left" label="游戏角色名称" prop="roleGameName" width="120" />
 
-        <el-table-column sortable align="left" label="游戏角色等级" prop="roleGameLevel" width="120" />
+        <el-table-column sortable align="left" label="游戏角色等级" prop="roleGameLevel" width="120" v-if="false" />
 
-        <el-table-column align="left" label="用户ID" prop="userId" width="120">
+        <el-table-column align="left" label="用户ID" prop="userId" width="120" v-if="false">
           <template #default="scope">
             <span>{{ filterDataSource(dataSource.userId, scope.row.userId) }}</span>
           </template>
@@ -300,7 +354,12 @@
             {{ filterDict(scope.row.bannedStatus, BannedStatusOptions) }}
           </template>
         </el-table-column>
-        <el-table-column sortable align="left" label="灵符变动差异" prop="talismanDiff" width="120" />
+        <el-table-column sortable align="left" label="未绑定元宝数量" prop="unBoundIngotQuantity" width="120" />
+        <el-table-column sortable align="left" label="线上元宝总数" prop="onlineIngotTotal" width="120" />
+        <el-table-column align="left" label="最后一次线上查询时间" prop="lastOnlineQueryTime" width="180">
+          <template #default="scope">{{ formatDate(scope.row.lastOnlineQueryTime) }}</template>
+        </el-table-column>
+        <el-table-column sortable align="left" label="灵符变动差异" prop="talismanDiff" width="120" v-if="false" />
 
         <el-table-column sortable align="left" label="元宝变动差异" prop="ingotDiff" width="120" />
 
@@ -328,14 +387,10 @@
         </el-table-column>
         <el-table-column sortable align="left" label="线上灵符总数" prop="onlineTalismanTotal" width="120" />
 
-        <el-table-column sortable align="left" label="线上元宝总数" prop="onlineIngotTotal" width="120" />
-
-        <el-table-column align="left" label="最后一次线上查询时间" prop="lastOnlineQueryTime" width="180">
-          <template #default="scope">{{ formatDate(scope.row.lastOnlineQueryTime) }}</template>
-        </el-table-column>
 
 
-        <el-table-column sortable align="left" label="未绑定元宝数量" prop="unBoundIngotQuantity" width="120" />
+
+
 
         <el-table-column sortable align="left" label="绑定元宝数量" prop="boundIngotQuantity" width="120" />
 
@@ -347,7 +402,7 @@
 
         <el-table-column sortable align="left" label="灵符总数" prop="totalTalisman" width="120" />
 
-        <el-table-column align="left" label="操作" fixed="right" :min-width="appStore.operateMinWith">
+        <el-table-column align="left" label="操作" fixed="right" :min-width="appStore.operateMinWith" v-if="false">
           <template #default="scope">
             <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
                 style="margin-right: 5px">
@@ -358,8 +413,13 @@
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
           </template>
         </el-table-column>
+
+
+
       </el-table>
       <div class="gva-pagination">
+
+
         <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
           :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
           @size-change="handleSizeChange" />
@@ -391,9 +451,12 @@
           <el-input v-model.number="formData.gameServerId" :clearable="true" placeholder="请输入区服ID" />
         </el-form-item>
 
-        <el-form-item label="登录码:" prop="loginCode">
-          <el-input v-model="formData.loginCode" :clearable="true" placeholder="请输入登录码" />
+          <el-form-item label="原始区服ID:" prop="serverZoneId">
+          <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入原始区服ID" />
         </el-form-item>
+
+
+       
         <el-form-item label="游戏角色名称:" prop="roleGameName">
           <el-input v-model="formData.roleGameName" :clearable="true" placeholder="请输入游戏角色名称" />
         </el-form-item>
@@ -466,9 +529,13 @@
         <el-form-item label="游戏角色ID:" prop="roleGameId">
           <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
         </el-form-item>
-        <el-form-item label="原始区服ID:" prop="serverZoneId">
-          <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入原始区服ID" />
+      
+       <el-form-item label="登录码:" prop="loginCode">
+          <el-input v-model="formData.loginCode" :clearable="true" placeholder="请输入登录码" />
         </el-form-item>
+
+
+
         <el-form-item label="最后一次交易元宝变动时间:" prop="lastIngotTradeTime">
           <el-date-picker v-model="formData.lastIngotTradeTime" type="date" style="width:100%" placeholder="选择日期"
             :clearable="true" />
@@ -607,7 +674,8 @@ import {
   deleteGameUserByIds,
   updateGameUser,
   findGameUser,
-  getGameUserList
+  getGameUserList,
+  updateItemByServerID
 } from '@/api/smartcreate/uGameUser'
 
 // 全量引入格式化工具 请按需保留
@@ -623,6 +691,22 @@ import ImportExcel from '@/components/exportExcel/importExcel.vue'
 // 导出模板组件
 import ExportTemplate from '@/components/exportExcel/exportTemplate.vue'
 
+// 数字转中文万/亿/万亿
+function toChineseNum(val) {
+  const n = Number(val)
+  if (isNaN(n)) return String(val)
+
+  if (n >= 1_0000_0000_0000) {
+    return (n / 1_0000_0000_0000).toFixed(2) + '万亿'
+  }
+  if (n >= 1_0000_0000) {
+    return (n / 1_0000_0000).toFixed(2) + '亿'
+  }
+  if (n >= 1_0000) {
+    return (n / 1_0000).toFixed(2) + '万'
+  }
+  return n.toString()
+}
 
 defineOptions({
   name: 'GameUser'
@@ -728,6 +812,9 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const totalItem = ref({})
+
+
 // 排序
 const sortChange = ({ prop, order }) => {
   const sortMap = {
@@ -787,8 +874,11 @@ const getTableData = async () => {
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
+    totalItem.value = table.data.totalItem
   }
 }
+
+
 
 getTableData()
 
@@ -938,6 +1028,7 @@ const enterDialog = async () => {
     switch (type.value) {
       case 'create':
         res = await createGameUser(formData.value)
+    
         break
       case 'update':
         res = await updateGameUser(formData.value)
@@ -963,12 +1054,13 @@ const detailForm = ref({})
 // 查看详情控制标记
 const detailShow = ref(false)
 
+// 服务器ID
+const serverID = ref('')
 
 // 打开详情弹窗
 const openDetailShow = () => {
   detailShow.value = true
 }
-
 
 // 打开详情
 const getDetails = async (row) => {
@@ -980,13 +1072,67 @@ const getDetails = async (row) => {
   }
 }
 
-
 // 关闭详情弹窗
 const closeDetailShow = () => {
   detailShow.value = false
   detailForm.value = {}
 }
 
+// 更新物品
+const handleUpdateItemByServerID = async () => {
+  if (!serverID.value.trim()) {
+    ElMessage.warning('请先输入服务器ID')
+    return
+  }
+  try {
+    
+    const res = await updateItemByServerID({ serverID: serverID.value.trim() })
+    if (res.code === 0) {
+      ElMessage.success('更新成功')
+      getTableData()
+    } 
+  } catch (e) {
+    console.error(e)
+    ElMessage.error(e.message || '未知错误')
+  }
+}
+
+// 兼容性复制整列数据到剪贴板
+const copyColumn = (field) => {
+  if (!tableData.value || tableData.value.length === 0) {
+    ElMessage.warning('暂无数据')
+    return
+  }
+  const list = tableData.value.map(item => item[field]).filter(v => v != null)
+  const text = list.join('\n')
+
+  // 1. 优先使用现代 Clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => ElMessage.success(`已复制 ${list.length} 条数据`))
+      .catch(() => fallbackCopy(text))
+  } else {
+    // 2. 降级方案
+    fallbackCopy(text)
+  }
+
+  function fallbackCopy(txt) {
+    const textarea = document.createElement('textarea')
+    textarea.value = txt
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      ElMessage.success(`已复制 ${list.length} 条数据`)
+    } catch (err) {
+      ElMessage.error('复制失败，请手动选择')
+    } finally {
+      document.body.removeChild(textarea)
+    }
+  }
+}
 
 </script>
 
