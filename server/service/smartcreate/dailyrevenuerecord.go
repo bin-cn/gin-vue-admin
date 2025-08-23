@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate"
 	smartcreateReq "github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/smartcreate/response"
 )
 
 type DailyRevenueRecordService struct{}
@@ -20,7 +21,6 @@ func (drService *DailyRevenueRecordService) CreateDailyRevenueRecord(ctx context
 
 func (drService *DailyRevenueRecordService) InstallDailyRevenueRecord() (err error) {
 	yesterdayStr := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
-
 	// 1. 昨天是否已有数据
 	var cnt int64
 	if err = global.GVA_DB.Model(&smartcreate.DailyRevenueRecord{}).
@@ -149,6 +149,46 @@ func (drService *DailyRevenueRecordService) GetDailyRevenueRecordInfoList(ctx co
 
 	err = db.Find(&drs).Error
 	return drs, total, err
+}
+
+// 统计数据
+func (drService *DailyRevenueRecordService) Statistic(ctx context.Context, info smartcreateReq.DailyRevenueStatisticSearch) (list []response.DailyRevenueStatistic, err error) {
+	// 此方法为获取数据源定义的数据
+	// 请自行实现
+	sql_str := ""
+	switch info.StatisticType {
+	case 1:
+		// 用户统计
+		user_statistic_sql := `SELECT  
+				MAX(user_nickname) AS user_nickname,
+				user_id ,           
+				MAX(server_name) AS server_name,
+				SUBSTRING(statistic_date, 9, 2) AS statistic_date,
+				MAX(server_zone_id) AS server_zone_id,  
+				SUM(amount) AS amount            
+				FROM gva.daily_revenue_records 
+				WHERE statistic_date LIKE CONCAT(?, '%')
+				GROUP BY user_id, statistic_date
+				ORDER BY statistic_date, user_id`
+		sql_str = user_statistic_sql
+	case 2:
+		// 区服统计
+		server_statistic_sql := `SELECT
+				MAX(user_nickname) AS user_nickname,  
+				MAX(user_id) AS user_id,              
+				MAX(server_name) AS server_name,
+				SUBSTRING(statistic_date, 9, 2) AS statistic_date,
+				server_zone_id,                       
+				SUM(amount) AS amount           
+				FROM gva.daily_revenue_records 
+				WHERE statistic_date LIKE CONCAT(?, '%')
+				GROUP BY server_zone_id, statistic_date
+				ORDER BY statistic_date, server_zone_id`
+		sql_str = server_statistic_sql
+	}
+	var statisticList []response.DailyRevenueStatistic
+	err = global.GVA_DB.Raw(sql_str, info.StatisticDate).Scan(&statisticList).Error
+	return statisticList, err
 }
 
 func (drService *DailyRevenueRecordService) GetDailyRevenueRecordPublic(ctx context.Context) {

@@ -1,6 +1,7 @@
-
 <template>
   <div>
+
+
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" @keyup.enter="onSubmit">
       <el-form-item label="创建日期" prop="createdAtRange">
@@ -184,8 +185,9 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, } from 'vue'
 import { useAppStore } from "@/pinia"
+
 
 // 导出组件
 import ExportExcel from '@/components/exportExcel/exportExcel.vue'
@@ -198,6 +200,8 @@ import ExportTemplate from '@/components/exportExcel/exportTemplate.vue'
 defineOptions({
     name: 'DailyRevenueRecord'
 })
+
+
 
 // 提交按钮loading
 const btnLoading = ref(false)

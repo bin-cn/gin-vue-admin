@@ -144,8 +144,28 @@ func (drApi *DailyRevenueRecordApi) FindDailyRevenueRecord(c *gin.Context) {
 // @Param data query smartcreateReq.DailyRevenueRecordSearch true "分页获取日收入统计列表"
 // @Success 200 {object} response.Response{data=response.PageResult,msg=string} "获取成功"
 // @Router /dr/getDailyRevenueRecordList [get]
+func (drApi *DailyRevenueRecordApi) Statistic(c *gin.Context) {
+	// 创建业务用Context
+	ctx := c.Request.Context()
+	var statisticSearch smartcreateReq.DailyRevenueStatisticSearch
+	err := c.ShouldBindQuery(&statisticSearch)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	list, err := drService.Statistic(ctx, statisticSearch)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败:"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(list, "获取成功", c)
+
+}
+
 func (drApi *DailyRevenueRecordApi) GetDailyRevenueRecordList(c *gin.Context) {
-	drService.InstallDailyRevenueRecord()
+	// drService.InstallDailyRevenueRecord()
 	// 创建业务用Context
 	ctx := c.Request.Context()
 

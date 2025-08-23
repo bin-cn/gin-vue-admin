@@ -74,5 +74,11 @@ func (t ItemUpdateLogs) Exec(arg interface{}) error {
 		return fmt.Errorf("更新完毕,以下区服未能更新成功:%s", strings.Join(list_errinfo, ","))
 	}
 
+	drService := &smartcreate.DailyRevenueRecordService{}
+	err = drService.InstallDailyRevenueRecord()
+	if err != nil {
+		return fmt.Errorf("更新完毕.但是插入统计数据失败:%s", err.Error())
+	}
+
 	return nil
 }

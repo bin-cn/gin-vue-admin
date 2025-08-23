@@ -95,6 +95,16 @@ export const getDailyRevenueRecordList = (params) => {
   })
 }
 
+
+export const getStatistic = (params) => {
+  return service({
+    url: '/dr/getStatistic',
+    method: 'get',
+    params
+  })
+}
+
+
 // @Tags DailyRevenueRecord
 // @Summary 不需要鉴权的日收入统计接口
 // @Accept application/json
