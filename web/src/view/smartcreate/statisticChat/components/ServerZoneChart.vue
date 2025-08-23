@@ -14,7 +14,7 @@
         </el-icon>
       </el-button>
     </div>
-    <div style="margin-top: 20px; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+    <div v-show="!isFullscreen" style="margin-top: 20px; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
       <h4 style="margin-bottom: 10px;">选择要显示的区服：</h4>
       
       <!-- 大区复选框 -->
@@ -126,6 +126,12 @@ const enterCSSFullscreen = () => {
   chartContainer.style.zIndex = '9999'
   chartContainer.style.backgroundColor = 'white'
   
+  // 设置图表容器占满全屏
+  const chartDiv = chartRef.value
+  chartDiv.style.width = '100%'
+  chartDiv.style.height = '100%'
+  chartDiv.style.minWidth = '100%'
+  
   // 调整图表大小
   nextTick(() => {
     chartInstance?.resize()
@@ -143,6 +149,12 @@ const exitCSSFullscreen = () => {
   chartContainer.style.height = ''
   chartContainer.style.zIndex = ''
   chartContainer.style.backgroundColor = ''
+  
+  // 恢复图表容器原始样式
+  const chartDiv = chartRef.value
+  chartDiv.style.width = '100%'
+  chartDiv.style.height = '600px'
+  chartDiv.style.minWidth = '800px'
   
   // 恢复原始大小
   nextTick(() => {
