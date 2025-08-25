@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -13,6 +14,23 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
+
+// ExcelSerialToSlash 把字符串形式的 Excel 序列日期 转成 2025/6/3 0:00
+func ExcelSerialToSlash(str string) string {
+	if str == "" {
+		return ""
+	}
+
+	// 如果是 6/3/25 00:00 格式
+	if strings.Contains(str, "/") {
+		if t, err := time.Parse("1/2/06 15:04", str); err == nil {
+			return t.Format("2006/1/2 15:04")
+		}
+	}
+
+	// 保持原有逻辑
+	return str
+}
 
 // ExcelStringToString 把字符串形式的 Excel 序列日期 转成年-月-日 时:分
 func ExcelStringToString(s string) string {
@@ -69,20 +87,132 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 
 	// 收集所有assigner_name用于批量查询
 	assignerNames := make([]string, 0)
+	roleGameIds := make([]string, 0)
+
 	for rowIndex := 1; rowIndex < len(rows); rowIndex++ {
 		row := rows[rowIndex]
 		if len(row) == 0 {
 			continue
 		}
+
 		assignerName := s.getCellValue(row, columnMap, "使用人")
 		if assignerName != "" {
 			assignerNames = append(assignerNames, assignerName)
 		}
+
+		roleGameId := s.getCellValue(row, columnMap, "游戏角色ID")
+		if roleGameId != "" {
+			roleGameIds = append(roleGameIds, roleGameId)
+		}
 	}
 
-	// 开始事务
-	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
-		// 预加载game_server数据到map，提高效率
+	// 预处理所有数据
+	authCodes := make([]*smartcreate.GameUserAuthCode, 0)
+
+	for rowIndex := 1; rowIndex < len(rows); rowIndex++ {
+		row := rows[rowIndex]
+		if len(row) == 0 {
+			continue // 跳过空行
+		}
+
+		// 创建实体
+		authCode := &smartcreate.GameUserAuthCode{}
+
+		// 处理登录码唯一性
+		loginCode := s.getCellValue(row, columnMap, "登录码")
+		if loginCode == "" {
+			return fmt.Errorf("第%d行: 登录码不能为空", rowIndex+1)
+		}
+
+		// 处理必填字段验证
+		assignerName := s.getCellValue(row, columnMap, "使用人")
+		if assignerName == "" {
+			return fmt.Errorf("第%d行: 使用人不能为空", rowIndex+1)
+		}
+
+		machineNoName := s.getCellValue(row, columnMap, "机器编号")
+		if machineNoName == "" {
+			return fmt.Errorf("第%d行: 机器编号不能为空", rowIndex+1)
+		}
+
+		account := s.getCellValue(row, columnMap, "账号")
+		if account == "" {
+			return fmt.Errorf("第%d行: 账号不能为空", rowIndex+1)
+		}
+
+		password := s.getCellValue(row, columnMap, "密码")
+		if password == "" {
+			return fmt.Errorf("第%d行: 密码不能为空", rowIndex+1)
+		}
+
+		gameServerName := s.getCellValue(row, columnMap, "区服")
+		if gameServerName == "" {
+			return fmt.Errorf("第%d行: 区服不能为空", rowIndex+1)
+		}
+
+		roleGameName := s.getCellValue(row, columnMap, "游戏角色名字")
+		if roleGameName == "" {
+			return fmt.Errorf("第%d行: 游戏角色名字不能为空", rowIndex+1)
+		}
+
+		idName := s.getCellValue(row, columnMap, "ID名字")
+		if idName == "" {
+			return fmt.Errorf("第%d行: ID名字不能为空", rowIndex+1)
+		}
+
+		idCardNumber := s.getCellValue(row, columnMap, "身份证号码")
+		if idCardNumber == "" {
+			return fmt.Errorf("第%d行: 身份证号码不能为空", rowIndex+1)
+		}
+
+		// 设置默认值
+		now := time.Now()
+		authCode.CreatedAt = now
+		authCode.UpdatedAt = now
+		authCode.LoginCode = &loginCode
+		authCode.AssignerName = &assignerName
+		authCode.MachineNoName = &machineNoName
+		authCode.Account = &account
+		authCode.Password = &password
+		authCode.GameServerName = &gameServerName
+		authCode.RoleGameName = &roleGameName
+		authCode.IDName = &idName
+		authCode.IDCardNumber = &idCardNumber
+
+		// 处理可选字段
+		roleGameId := s.getCellValue(row, columnMap, "游戏角色ID")
+		if roleGameId != "" {
+			authCode.RoleGameId = &roleGameId
+		}
+
+		gameServerId := s.parseInt(s.getCellValue(row, columnMap, "区服ID"))
+		if gameServerId > 0 {
+			authCode.GameServerId = &gameServerId
+		}
+
+		serverOpenTime := s.getCellValue(row, columnMap, "开区时间")
+		if serverOpenTime != "" {
+			serverOpenTime = ExcelSerialToSlash(serverOpenTime)
+			authCode.ServerOpenTime = &serverOpenTime
+		}
+
+		enterServerTime := s.getCellValue(row, columnMap, "进区时间")
+		if enterServerTime != "" {
+			enterServerTime = ExcelStringToString(enterServerTime)
+			authCode.EnterServerTime = &enterServerTime
+		}
+
+		remark := s.getCellValue(row, columnMap, "备注")
+		if remark != "" {
+			authCode.Remark = &remark
+		}
+
+		authCodes = append(authCodes, authCode)
+	}
+
+	// 开始事务，只包裹数据库操作
+	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// 预加载game_server数据到map
 		serverMap, err := s.loadGameServerMap(tx)
 		if err != nil {
 			return fmt.Errorf("预加载游戏服务器数据失败: %w", err)
@@ -94,23 +224,31 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 			return fmt.Errorf("批量查询用户数据失败: %w", err)
 		}
 
-		// 准备批量插入的数据
-		authCodes := make([]*smartcreate.GameUserAuthCode, 0)
-
-		// 收集所有role_game_id用于批量检查唯一性
-		roleGameIds := make([]string, 0)
-		for rowIndex := 1; rowIndex < len(rows); rowIndex++ {
-			row := rows[rowIndex]
-			if len(row) == 0 {
-				continue
+		// 处理用户ID映射和登录码唯一性
+		for _, authCode := range authCodes {
+			// 处理用户ID
+			userID, exists := userMap[*authCode.AssignerName]
+			if !exists {
+				return fmt.Errorf("用户 '%s' 不存在", *authCode.AssignerName)
 			}
-			roleGameId := s.getCellValue(row, columnMap, "角色游戏ID")
-			if roleGameId != "" {
-				roleGameIds = append(roleGameIds, roleGameId)
+			authCode.UserId = &userID
+
+			// 处理登录码唯一性
+			uniqueLoginCode, err := s.generateUniqueLoginCode(tx, *authCode.LoginCode)
+			if err != nil {
+				return fmt.Errorf("生成唯一登录码失败: %w", err)
+			}
+			authCode.LoginCode = uniqueLoginCode
+
+			// 处理区服ID映射
+			if authCode.GameServerId != nil && *authCode.GameServerId > 0 {
+				if serverInfo, exists := serverMap[*authCode.GameServerId]; exists && serverInfo.MainServerZoneId != nil {
+					authCode.MainServerZone = serverInfo.MainServerZoneId
+				}
 			}
 		}
 
-		// 批量检查role_game_id的唯一性
+		// 检查角色游戏ID唯一性
 		if len(roleGameIds) > 0 {
 			var existingRoleGameIds []string
 			err = tx.Model(&smartcreate.GameUserAuthCode{}).
@@ -124,139 +262,25 @@ func (s *GameUserAuthCodeImportService) ImportExcelWithCustomLogic(ctx context.C
 			}
 		}
 
-		// 处理每一行数据
-		for rowIndex := 1; rowIndex < len(rows); rowIndex++ {
-			row := rows[rowIndex]
-			if len(row) == 0 {
-				continue // 跳过空行
-			}
+		// 批量创建记录 - 分批处理避免MySQL占位符限制
+		const batchSize = 1000
+		if len(authCodes) > 0 {
+			totalRecords := len(authCodes)
+			for i := 0; i < totalRecords; i += batchSize {
+				end := i + batchSize
+				if end > totalRecords {
+					end = totalRecords
+				}
 
-			// 创建实体
-			authCode := &smartcreate.GameUserAuthCode{}
-
-			// 处理登录码唯一性
-			loginCode := s.getCellValue(row, columnMap, "登录码")
-			if loginCode == "" {
-				return fmt.Errorf("第%d行: 登录码不能为空", rowIndex+1)
-			}
-
-			// 检查登录码是否已存在
-			uniqueLoginCode, err := s.generateUniqueLoginCode(tx, loginCode)
-			if err != nil {
-				return fmt.Errorf("第%d行: 生成唯一登录码失败: %w", rowIndex+1, err)
-			}
-			authCode.LoginCode = uniqueLoginCode
-
-			// 处理使用人查询用户ID
-			assignerName := s.getCellValue(row, columnMap, "使用人")
-			if assignerName == "" {
-				return fmt.Errorf("第%d行: 使用人不能为空", rowIndex+1)
-			}
-			authCode.AssignerName = &assignerName
-
-			userID, exists := userMap[assignerName]
-			if !exists {
-				return fmt.Errorf("第%d行: 用户 '%s' 不存在", rowIndex+1, assignerName)
-			}
-			authCode.UserId = &userID
-
-			// 处理必填字段
-			machineNoName := s.getCellValue(row, columnMap, "机器编号")
-			if machineNoName == "" {
-				return fmt.Errorf("第%d行: 机器编号不能为空", rowIndex+1)
-			}
-			authCode.MachineNoName = &machineNoName
-
-			account := s.getCellValue(row, columnMap, "账号")
-			if account == "" {
-				return fmt.Errorf("第%d行: 账号不能为空", rowIndex+1)
-			}
-			authCode.Account = &account
-
-			password := s.getCellValue(row, columnMap, "密码")
-			if password == "" {
-				return fmt.Errorf("第%d行: 密码不能为空", rowIndex+1)
-			}
-			authCode.Password = &password
-
-			gameServerName := s.getCellValue(row, columnMap, "区服")
-			if gameServerName == "" {
-				return fmt.Errorf("第%d行: 区服不能为空", rowIndex+1)
-			}
-			authCode.GameServerName = &gameServerName
-
-			roleGameName := s.getCellValue(row, columnMap, "游戏角色名字")
-			if roleGameName == "" {
-				return fmt.Errorf("第%d行: 游戏角色名字不能为空", rowIndex+1)
-			}
-			authCode.RoleGameName = &roleGameName
-
-			idName := s.getCellValue(row, columnMap, "ID名字")
-			if idName == "" {
-				return fmt.Errorf("第%d行: ID名字不能为空", rowIndex+1)
-			}
-			authCode.IDName = &idName
-
-			idCardNumber := s.getCellValue(row, columnMap, "身份证号码")
-			if idCardNumber == "" {
-				return fmt.Errorf("第%d行: 身份证号码不能为空", rowIndex+1)
-			}
-			authCode.IDCardNumber = &idCardNumber
-
-			// 处理可选字段
-			roleGameId := s.getCellValue(row, columnMap, "角色游戏ID")
-			if roleGameId != "" {
-				authCode.RoleGameId = &roleGameId
-			}
-
-			gameServerId := s.parseInt(s.getCellValue(row, columnMap, "区服ID"))
-			if gameServerId > 0 {
-				authCode.GameServerId = &gameServerId
-
-				// 新增：从预加载的map中获取main_server_zone_id
-				if serverInfo, exists := serverMap[gameServerId]; exists && serverInfo.MainServerZoneId != nil {
-					// 直接使用MainServerZoneId（已经是*string类型）
-					authCode.MainServerZone = serverInfo.MainServerZoneId
+				batch := authCodes[i:end]
+				if err := tx.Create(&batch).Error; err != nil {
+					return fmt.Errorf("批量创建授权码记录失败: %w", err)
 				}
 			}
-
-			serverOpenTime := s.getCellValue(row, columnMap, "开服时间")
-			if serverOpenTime != "" {
-				serverOpenTime = ExcelStringToString(serverOpenTime)
-				authCode.ServerOpenTime = &serverOpenTime
-			}
-
-			enterServerTime := s.getCellValue(row, columnMap, "进服时间")
-			if enterServerTime != "" {
-				enterServerTime = ExcelStringToString(enterServerTime)
-				authCode.EnterServerTime = &enterServerTime
-			}
-
-			remark := s.getCellValue(row, columnMap, "备注")
-			if remark != "" {
-				authCode.Remark = &remark
-			}
-
-			// 设置默认值
-			now := time.Now()
-			authCode.CreatedAt = now
-			authCode.UpdatedAt = now
-
-			authCodes = append(authCodes, authCode)
-		}
-
-		// 批量创建记录
-		if len(authCodes) > 0 {
-			if err := tx.Create(&authCodes).Error; err != nil {
-				return fmt.Errorf("批量创建授权码记录失败: %w", err)
-			}
-			fmt.Printf("成功批量创建 %d 条授权码记录", len(authCodes))
 		}
 
 		return nil
 	})
-
-	return err
 }
 
 // loadGameServerMap 预加载game_server数据到map，提高效率
@@ -329,6 +353,13 @@ func (s *GameUserAuthCodeImportService) getUserMapByNickNames(tx *gorm.DB, nickN
 	}
 
 	return userMap, nil
+}
+
+func (s *GameUserAuthCodeImportService) getCellValueTime(row []string, columnMap map[string]int, columnName string) string {
+	if index, exists := columnMap[columnName]; exists && index < len(row) {
+		return strings.TrimSpace(row[index])
+	}
+	return ""
 }
 
 // getCellValue 安全获取单元格值

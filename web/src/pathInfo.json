@@ -52,6 +52,7 @@
   "/src/view/smartcreate/statisticChat/components/ServerZoneChart.vue": "ServerZoneChart",
   "/src/view/smartcreate/statisticChat/components/UserStatChart.vue": "UserStatChart",
   "/src/view/smartcreate/statisticChat/index.vue": "Index",
+  "/src/view/smartcreate/statisticChat/statistic.vue": "Statistic",
   "/src/view/smartcreate/uGameUser/uGameUser.vue": "GameUser",
   "/src/view/smartcreate/uGameUser/uGameUserForm.vue": "GameUserForm",
   "/src/view/smartcreate/uGameUserAuthCode/uGameUserAuthCode.vue": "GameUserAuthCode",

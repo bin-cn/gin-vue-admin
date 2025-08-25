@@ -91,6 +91,12 @@ const toggleFullscreen = async () => {
       } else if ((chartContainer as any).msRequestFullscreen) {
         await (chartContainer as any).msRequestFullscreen()
       }
+
+      const chartDivFullscreen = chartRef.value
+      chartDivFullscreen.style.width = '100%'
+      chartDivFullscreen.style.height = '100%'
+      chartDivFullscreen.style.minWidth = '100%'
+
     } catch (error) {
       console.error('进入全屏失败:', error)
       // 如果浏览器不支持全屏API，使用CSS全屏模式
@@ -108,6 +114,12 @@ const toggleFullscreen = async () => {
       } else if ((document as any).msExitFullscreen) {
         await (document as any).msExitFullscreen()
       }
+
+      const chartDivFullscreen = chartRef.value
+       chartDivFullscreen.style.width = '100%'
+       chartDivFullscreen.style.height = '600px'
+       chartDivFullscreen.style.minWidth = '100%'
+
     } catch (error) {
       console.error('退出全屏失败:', error)
       exitCSSFullscreen()
