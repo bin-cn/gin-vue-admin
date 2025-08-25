@@ -20,7 +20,7 @@
         <el-checkbox 
           v-for="user in userList" 
           :key="user.key" 
-          :label="user.key"
+          :value="user.key"
           style="margin-right: 15px; margin-bottom: 5px;">
           {{ user.nickname }} (ID: {{ user.userId }})
         </el-checkbox>
@@ -240,15 +240,27 @@ watch(() => userList.value, (newList) => {
 const renderChart = () => {
   if (!chartRef.value || !props.data.length) return
 
-  // 确保容器有正确的尺寸
+  // 检查DOM尺寸
   const container = chartRef.value
-  if (container.offsetWidth < 200) {
-    container.style.minWidth = '800px'
+  if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
+    //console.warn('ECharts容器尺寸为0，延迟重试...')
+
+    // setTimeout(() => {
+    //   renderChart()
+    // }, 100)
+
+
+    return
   }
 
-  if (!chartInstance) {
-    chartInstance = echarts.init(chartRef.value)
+  // 如果已有实例，先销毁
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
   }
+
+  // 初始化图表
+  chartInstance = echarts.init(chartRef.value)
 
   // 获取所有唯一的日期，按日期排序
   const allDates = Array.from(new Set(props.data.map(item => item.statisticDate)))
