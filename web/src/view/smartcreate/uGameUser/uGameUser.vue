@@ -25,7 +25,7 @@
           </el-select>
         </el-form-item>
 
-     
+
         <el-form-item label="用户ID" prop="userId" v-if="false">
           <el-select v-model="searchInfo.userId" filterable placeholder="请选择用户ID" :clearable="true">
             <el-option v-for="(item, key) in dataSource.userId" :key="key" :label="item.label" :value="item.value" />
@@ -71,22 +71,14 @@
           <el-input class="w-40" v-model.number="searchInfo.endTalismanDiff" placeholder="最大值" />
         </el-form-item>
 
-
-
-
-
-
         <el-form-item label="游戏角色ID" prop="roleGameId">
           <el-input v-model="searchInfo.roleGameId" placeholder="搜索条件" />
         </el-form-item>
 
 
-           <el-form-item label="登录码" prop="loginCode">
+        <el-form-item label="登录码" prop="loginCode">
           <el-input v-model="searchInfo.loginCode" placeholder="搜索条件" />
         </el-form-item>
-
-
-
 
 
         <el-form-item label="线上灵符总数" prop="onlineTalismanTotal">
@@ -104,9 +96,9 @@
         <template v-if="showAllQuery">
           <!-- 将需要控制显示状态的查询条件添加到此范围内 -->
           <el-form-item label="主区服ID" prop="serverZoneId">
-          <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
-        </el-form-item>
- 
+            <el-input v-model="searchInfo.serverZoneId" placeholder="搜索条件" />
+          </el-form-item>
+
 
           <el-form-item label="绑定元宝数量" prop="boundIngotQuantity">
             <el-input class="w-40" v-model.number="searchInfo.startBoundIngotQuantity" placeholder="最小值" />
@@ -256,13 +248,13 @@
       <!-- 外层只做居中 -->
       <div style="display: flex; justify-content: center; margin-bottom: 16px;">
 
-      
+        
 
         <div style="display: flex; gap: 12px; align-items: center; margin-right: 20px;">
 
           <el-input v-model="serverID" placeholder="请输入服务器ID" clearable></el-input>
           <el-button size="mini" type="primary" @click="handleUpdateItemByServerID">
-            更新物品
+            更新线上元宝数
           </el-button>
 
           <el-button size="mini" type="primary" @click="copyColumn('onlineIngotTotal')">
@@ -298,7 +290,7 @@
       </div>
     </div>
     <div class="gva-table-box">
-      <div class="gva-btn-list"  v-if="false">
+      <div class="gva-btn-list" v-if="false">
         <el-button type="primary" icon="plus" @click="openDialog()" v-if="false">新增</el-button>
         <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete"
           v-if="false">删除</el-button>
@@ -451,12 +443,12 @@
           <el-input v-model.number="formData.gameServerId" :clearable="true" placeholder="请输入区服ID" />
         </el-form-item>
 
-          <el-form-item label="原始区服ID:" prop="serverZoneId">
+        <el-form-item label="原始区服ID:" prop="serverZoneId">
           <el-input v-model="formData.serverZoneId" :clearable="true" placeholder="请输入原始区服ID" />
         </el-form-item>
 
 
-       
+
         <el-form-item label="游戏角色名称:" prop="roleGameName">
           <el-input v-model="formData.roleGameName" :clearable="true" placeholder="请输入游戏角色名称" />
         </el-form-item>
@@ -529,8 +521,8 @@
         <el-form-item label="游戏角色ID:" prop="roleGameId">
           <el-input v-model="formData.roleGameId" :clearable="true" placeholder="请输入游戏角色ID" />
         </el-form-item>
-      
-       <el-form-item label="登录码:" prop="loginCode">
+
+        <el-form-item label="登录码:" prop="loginCode">
           <el-input v-model="formData.loginCode" :clearable="true" placeholder="请输入登录码" />
         </el-form-item>
 
@@ -1028,7 +1020,7 @@ const enterDialog = async () => {
     switch (type.value) {
       case 'create':
         res = await createGameUser(formData.value)
-    
+
         break
       case 'update':
         res = await updateGameUser(formData.value)
@@ -1085,12 +1077,12 @@ const handleUpdateItemByServerID = async () => {
     return
   }
   try {
-    
+
     const res = await updateItemByServerID({ serverID: serverID.value.trim() })
     if (res.code === 0) {
       ElMessage.success('更新成功')
       getTableData()
-    } 
+    }
   } catch (e) {
     console.error(e)
     ElMessage.error(e.message || '未知错误')
