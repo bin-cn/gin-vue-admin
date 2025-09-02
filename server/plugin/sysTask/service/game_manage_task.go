@@ -309,7 +309,8 @@ func (t ListServerTask) Exec(arg interface{}) error {
 	existingServers := make(map[string]model.GameServer)
 	for _, server := range list {
 		if server.ServerZoneId != nil {
-			existingServers[*server.ServerZoneId] = server
+
+			existingServers[*server.ServerId] = server
 		}
 	}
 
@@ -319,7 +320,7 @@ func (t ListServerTask) Exec(arg interface{}) error {
 	// 遍历网络获取的服务器数据
 	for _, newServer := range servers {
 		// 如果ServerId在数据库中不存在，则准备创建新记录
-		if _, exists := existingServers[newServer.ServerId]; !exists {
+		if _, exists := existingServers[newServer.Id]; !exists {
 			gameServer := model.GameServer{
 				ServerId:     &newServer.Id,
 				ServerName:   &newServer.Name,
@@ -329,7 +330,6 @@ func (t ListServerTask) Exec(arg interface{}) error {
 			newServers = append(newServers, gameServer)
 		}
 	}
-
 	// 批量创建新记录
 	if len(newServers) > 0 {
 		if err := global.GVA_DB.Create(&newServers).Error; err != nil {
